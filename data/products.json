@@ -1,0 +1,92 @@
+[
+  {
+    "id": "p_001",
+    "category": "iPhone",
+    "model": "iPhone 13 Pro",
+    "storage": "128GB",
+    "condition": "A",
+    "price": 749,
+    "quantity": 4,
+    "image": "/placeholder.svg"
+  },
+  {
+    "id": "p_002",
+    "category": "iPhone",
+    "model": "iPhone 13 Pro",
+    "storage": "256GB",
+    "condition": "A",
+    "price": 829,
+    "quantity": 3,
+    "image": "/placeholder.svg"
+  },
+  {
+    "id": "p_003",
+    "category": "iPhone",
+    "model": "iPhone 13 Pro Max",
+    "storage": "256GB",
+    "condition": "B",
+    "price": 879,
+    "quantity": 2,
+    "image": "/placeholder.svg"
+  },
+  {
+    "id": "p_004",
+    "category": "iPhone",
+    "model": "iPhone 14 Pro ",
+    "storage": "128GB",
+    "condition": "A",
+    "price": 949.07,
+    "quantity": 5,
+    "image": "/placeholder.svg"
+  },
+  {
+    "id": "p_005",
+    "category": "iPhone",
+    "model": "iPhone 14 Pro Max",
+    "storage": "256GB",
+    "condition": "A",
+    "price": 1149,
+    "quantity": 1,
+    "image": "/placeholder.svg"
+  },
+  {
+    "id": "p_006",
+    "category": "iPhone",
+    "model": "iPhone 12",
+    "storage": "64GB",
+    "condition": "C",
+    "price": 399,
+    "quantity": 6,
+    "image": "/placeholder.svg"
+  },
+  {
+    "id": "p_007",
+    "category": "Accessories",
+    "model": "Apple 20W USB-C Charger",
+    "storage": "-",
+    "condition": "A",
+    "price": 19,
+    "quantity": 19,
+    "image": "/placeholder.svg"
+  },
+  {
+    "id": "p_008",
+    "category": "Accessories",
+    "model": "Lightning Cable 1m",
+    "storage": "-",
+    "condition": "A",
+    "price": 12,
+    "quantity": 40,
+    "image": "/placeholder.svg"
+  },
+  {
+    "id": "p_009",
+    "category": "Accessories",
+    "model": "AirPods Pro (2nd gen)",
+    "storage": "-",
+    "condition": "A",
+    "price": 199,
+    "quantity": 8,
+    "image": "/placeholder.svg"
+  }
+]

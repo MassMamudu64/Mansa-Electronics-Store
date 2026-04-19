@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html, body {
+  background-color: #FFFFFF;
+  color: #0A0E17;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Subtle scrollbar */
+* { scrollbar-width: thin; scrollbar-color: #C9CDD6 transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: #C9CDD6; border-radius: 8px; }
+
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-ink-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gold-500 px-5 py-2.5 text-sm font-semibold text-ink-900 transition hover:bg-gold-400 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink-100 bg-white px-5 py-2.5 text-sm font-semibold text-ink-900 transition hover:border-ink-900 hover:bg-ink-50 active:scale-[0.98];
+  }
+  .btn-link {
+    @apply inline-flex items-center gap-1 text-sm font-semibold text-ink-900 underline-offset-4 hover:underline;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full rounded-lg border border-ink-100 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder-ink-300 transition focus:border-ink-900 focus:outline-none focus:ring-2 focus:ring-ink-900/10;
+  }
+  .input-error { @apply border-rose-500 focus:border-rose-500 focus:ring-rose-500/15; }
+
+  /* Surfaces */
+  .card {
+    @apply rounded-xl border border-ink-100 bg-white shadow-card;
+  }
+  .card-elev {
+    @apply rounded-xl border border-ink-100 bg-white shadow-card-lg;
+  }
+  .section {
+    @apply py-14 md:py-20;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold;
+  }
+  .badge-gold { @apply bg-gold-50 text-gold-700 ring-1 ring-inset ring-gold-200; }
+  .badge-green { @apply bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200; }
+  .badge-amber { @apply bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200; }
+  .badge-rose  { @apply bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200; }
+  .badge-ink   { @apply bg-ink-50 text-ink-700 ring-1 ring-inset ring-ink-100; }
+
+  /* Pills (tabs / chips) */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-ink-100 bg-white px-3 py-1 text-xs font-medium text-ink-600 transition hover:border-ink-900 hover:text-ink-900;
+  }
+  .chip-active {
+    @apply border-ink-900 bg-ink-900 text-white;
+  }
+
+  /* Divider */
+  .hr { @apply border-t border-ink-100; }
+
+  /* Eyebrow (small uppercase label) */
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-widest text-gold-600;
+  }
+
+  /* Link style */
+  .link-muted {
+    @apply text-sm text-ink-400 hover:text-ink-900 transition;
+  }
+}
+
+/* Subtle focus ring polish */
+:focus-visible {
+  outline: 2px solid rgba(10, 14, 23, 0.35);
+  outline-offset: 2px;
+}

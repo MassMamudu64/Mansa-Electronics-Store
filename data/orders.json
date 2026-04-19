@@ -1,0 +1,52 @@
+[
+  {
+    "id": "ord_mo5hd17m_4c0bf8",
+    "createdAt": "2026-04-19T08:04:38.627Z",
+    "customer": {
+      "name": "Mohammed",
+      "email": "masskeita64@gmail.com",
+      "phone": "738039482",
+      "address": "385  dai dial MN 55443"
+    },
+    "items": [
+      {
+        "id": "p_005",
+        "model": "iPhone 14 Pro Max",
+        "storage": "256GB",
+        "condition": "A",
+        "price": 1149,
+        "quantity": 1
+      }
+    ],
+    "totals": {
+      "subtotal": 1149,
+      "total": 1149
+    },
+    "status": "pending"
+  },
+  {
+    "id": "ord_mo5i5egq_127665",
+    "createdAt": "2026-04-19T08:26:42.170Z",
+    "customer": {
+      "name": "Mamudu Massalay",
+      "email": "masskeita64@gmail.com",
+      "phone": "0775528982",
+      "address": "3125 94th Ave N MN 55443"
+    },
+    "items": [
+      {
+        "id": "p_007",
+        "model": "Apple 20W USB-C Charger",
+        "storage": "-",
+        "condition": "A",
+        "price": 19,
+        "quantity": 1
+      }
+    ],
+    "totals": {
+      "subtotal": 19,
+      "total": 19
+    },
+    "status": "pending"
+  }
+]
