@@ -10,13 +10,20 @@
     "seed": "node scripts/seed.js"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.1",
+    "@tanstack/react-query": "^5.100.8",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.14.0",
     "next": "14.2.5",
     "nodemailer": "6.9.14",
     "pdfkit": "0.15.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6",
     "zustand": "^5.0.12"
   },

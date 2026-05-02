@@ -47,7 +47,8 @@
       "subtotal": 19,
       "total": 19
     },
-    "status": "pending"
+    "status": "cancelled",
+    "updatedAt": "2026-05-02T16:55:50.231Z"
   },
   {
     "id": "ord_moejyj85_f6515e",
@@ -72,7 +73,8 @@
       "subtotal": 879,
       "total": 879
     },
-    "status": "pending"
+    "status": "completed",
+    "updatedAt": "2026-05-02T16:56:09.200Z"
   },
   {
     "id": "ord_mog4rsel_06650e",
@@ -114,5 +116,33 @@
       "total": 2527.07
     },
     "status": "pending"
+  },
+  {
+    "customer": {
+      "name": "Mansa_Workflow",
+      "email": "codehub65@gmail.com",
+      "phone": "+231778437492",
+      "address": "3124 97th ave n",
+      "notes": ""
+    },
+    "items": [
+      {
+        "id": "p_001",
+        "sku": "p_001",
+        "price": 749,
+        "quantity": 3
+      }
+    ],
+    "totals": {
+      "subtotal": 2247,
+      "bundleDiscount": 0,
+      "delivery": 0,
+      "total": 2247
+    },
+    "status": "pending",
+    "id": "ord_mooibcfkl5oqdb",
+    "shortCode": "M-CFZ7",
+    "createdAt": "2026-05-02T15:38:56.816Z",
+    "updatedAt": "2026-05-02T15:38:56.816Z"
   }
 ]

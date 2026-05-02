@@ -1,78 +1,98 @@
 'use client';
 
 import Link from 'next/link';
+import Logo from './Logo';
+
+const LINKS = {
+  Shop: [
+    { label: 'All Products', href: '/shop' },
+    { label: 'Smartphones', href: '/shop?category=iPhone' },
+    { label: 'Chargers', href: '/shop?category=Chargers' },
+    { label: 'Audio', href: '/shop?category=Audio' },
+    { label: 'Cases & Covers', href: '/shop?category=Cases' },
+    { label: 'Power Banks', href: '/shop?category=PowerBanks' },
+  ],
+  Support: [
+    { label: 'FAQ', href: '/#faq' },
+    { label: 'Warranty', href: '/#warranty' },
+    { label: 'Returns & Shipping', href: '/#returns' },
+    { label: 'Contact Us', href: '/#contact' },
+  ],
+  Company: [
+    { label: 'About Mansa', href: '/#about' },
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
+    { label: 'Store Admin', href: '/admin' },
+  ],
+};
 
 export default function Footer() {
   return (
-    <footer className="mt-24 border-t border-ink-100 bg-ink-900 text-ink-100">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 md:grid-cols-5">
-        <div className="md:col-span-2">
-          <div className="flex items-baseline gap-2">
-            <span className="text-[22px] font-black tracking-[0.22em] text-white">MANSA</span>
-            <span className="text-[10px] font-semibold tracking-[0.3em] text-gold-400 uppercase">Electronics</span>
+    <footer className="bg-charcoal-950 text-charcoal-300">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        {/* Main grid */}
+        <div className="grid gap-12 py-16 md:grid-cols-5 lg:gap-16">
+
+          {/* Brand column */}
+          <div className="md:col-span-2">
+            <Logo variant="light" />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-charcoal-400">
+              Premium mobile electronics and accessories. Every product curated for quality, performance, and value.
+            </p>
+
+            {/* Newsletter */}
+            <form
+              className="mt-6 flex max-w-xs gap-2"
+              onSubmit={(e) => e.preventDefault()}
+            >
+              <input
+                type="email"
+                required
+                placeholder="Your email"
+                className="flex-1 rounded-full border border-charcoal-700 bg-charcoal-900 px-4 py-2.5 text-sm text-white placeholder-charcoal-500 focus:border-charcoal-400 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-charcoal-900 transition hover:bg-charcoal-100"
+              >
+                Join
+              </button>
+            </form>
+            <p className="mt-2 text-xs text-charcoal-500">Get exclusive deals and new arrivals.</p>
           </div>
-          <p className="mt-4 max-w-sm text-sm text-ink-300">
-            Premium iPhones and accessories — every device hand-tested, graded, and
-            backed by a 12-month limited warranty.
-          </p>
-          <form
-            className="mt-6 flex max-w-sm items-center gap-2"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <input
-              type="email"
-              required
-              placeholder="Your email"
-              className="w-full rounded-full border border-ink-700 bg-ink-800 px-4 py-2.5 text-sm text-white placeholder-ink-400 focus:border-gold-400 focus:outline-none"
-            />
-            <button className="btn-gold whitespace-nowrap" type="submit">Subscribe</button>
-          </form>
-          <p className="mt-2 text-xs text-ink-400">Get early access to new drops and deals.</p>
+
+          {/* Link columns */}
+          {Object.entries(LINKS).map(([title, items]) => (
+            <div key={title}>
+              <h4 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-charcoal-500">{title}</h4>
+              <ul className="space-y-2.5">
+                {items.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="text-sm text-charcoal-400 transition hover:text-white"
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <FooterCol title="Shop">
-          <FooterLink href="/shop">All products</FooterLink>
-          <FooterLink href="/shop?category=iPhone">iPhones</FooterLink>
-          <FooterLink href="/shop?category=Accessories">Accessories</FooterLink>
-          <FooterLink href="/shop?deals=1">Deals</FooterLink>
-        </FooterCol>
-
-        <FooterCol title="Support">
-          <FooterLink href="/#conditions">Condition guide</FooterLink>
-          <FooterLink href="/#faq">FAQ</FooterLink>
-          <FooterLink href="/#warranty">Warranty</FooterLink>
-          <FooterLink href="/#returns">Returns & shipping</FooterLink>
-        </FooterCol>
-
-        <FooterCol title="Company">
-          <FooterLink href="/#about">About Mansa</FooterLink>
-          <FooterLink href="/#contact">Contact</FooterLink>
-          <FooterLink href="/admin">Store admin</FooterLink>
-        </FooterCol>
-      </div>
-
-      <div className="border-t border-ink-700">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-ink-400 md:flex-row">
-          <span>© {new Date().getFullYear()} Mansa Electronics. All rights reserved.</span>
-          <div className="flex items-center gap-4">
-            <span>Terms</span>
-            <span>Privacy</span>
-            <span>Cookies</span>
+        {/* Bottom bar */}
+        <div className="border-t border-charcoal-800 py-5">
+          <div className="flex flex-col items-center justify-between gap-3 text-xs text-charcoal-600 md:flex-row">
+            <span>© {new Date().getFullYear()} Mansa Electronics. All rights reserved.</span>
+            <div className="flex items-center gap-4">
+              <Link href="/terms" className="hover:text-charcoal-300 transition">Terms</Link>
+              <Link href="/privacy" className="hover:text-charcoal-300 transition">Privacy</Link>
+            </div>
           </div>
         </div>
       </div>
     </footer>
   );
-}
-
-function FooterCol({ title, children }) {
-  return (
-    <div>
-      <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-gold-400">{title}</h4>
-      <ul className="space-y-2 text-sm text-ink-200">{children}</ul>
-    </div>
-  );
-}
-function FooterLink({ href, children }) {
-  return <li><Link href={href} className="hover:text-white transition">{children}</Link></li>;
 }

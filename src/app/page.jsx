@@ -1,23 +1,17 @@
 import Hero from '@/components/Hero';
-import TrustRail from '@/components/TrustRail';
-import CategoryTiles from '@/components/CategoryTiles';
 import FeaturedProducts from '@/components/FeaturedProducts';
-import ConditionGuide from '@/components/ConditionGuide';
-import WhyMansa from '@/components/WhyMansa';
-import Testimonials from '@/components/Testimonials';
-import FAQSection from '@/components/FAQSection';
+import CategorySection from '@/components/CategorySection';
+import PromoBanner from '@/components/PromoBanner';
+import TrustSection from '@/components/TrustSection';
 
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <TrustRail />
-      <CategoryTiles />
       <FeaturedProducts />
-      <ConditionGuide />
-      <WhyMansa />
-      <Testimonials />
-      <FAQSection />
+      <CategorySection />
+      <PromoBanner />
+      <TrustSection />
     </>
   );
 }

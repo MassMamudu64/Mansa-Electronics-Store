@@ -1,184 +1,259 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { productService } from '@/services/productService';
+import { useQuery } from '@tanstack/react-query';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
-import FilterSidebar from '@/components/FilterSidebar';
-import Breadcrumbs from '@/components/Breadcrumbs';
 
-function ShopInner() {
-  const params = useSearchParams();
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [sort, setSort] = useState('featured');
+const CATEGORIES = [
+  { label: 'Smartphones',  value: 'iPhone' },
+  { label: 'Chargers',     value: 'Chargers' },
+  { label: 'Audio',        value: 'Audio' },
+  { label: 'Cases',        value: 'Cases' },
+  { label: 'Cables',       value: 'Cables' },
+  { label: 'Power Banks',  value: 'PowerBanks' },
+  { label: 'Accessories',  value: 'Accessories' },
+];
 
-  const initialCategory = params.get('category');
-  const initialQuery = params.get('q') || '';
-
-  const [query, setQuery] = useState(initialQuery);
-  const [filters, setFilters] = useState({
-    categories: initialCategory ? [initialCategory] : [],
-    conditions: [],
-    storages: [],
-    variants: [],
-    minPrice: '',
-    maxPrice: '',
-    inStockOnly: true,
-  });
-
-  useEffect(() => {
-    let cancelled = false;
-    productService.getAll().then((data) => {
-      if (cancelled) return;
-      setProducts(data);
-      setLoading(false);
-    });
-    return () => { cancelled = true; };
-  }, []);
-
-  useEffect(() => {
-    const cat = params.get('category');
-    const q = params.get('q') || '';
-    setQuery(q);
-    setFilters((f) => ({ ...f, categories: cat ? [cat] : f.categories }));
-  }, [params]);
-
-  const categories = useMemo(
-    () => Array.from(new Set(products.map((p) => p.category))).sort(),
-    [products]
-  );
-  const storages = useMemo(
-    () => Array.from(new Set(products.map((p) => p.storage).filter(Boolean))).sort(),
-    [products]
-  );
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const min = filters.minPrice === '' ? 0 : Number(filters.minPrice);
-    const max = filters.maxPrice === '' ? Infinity : Number(filters.maxPrice);
-    let list = products.filter((p) => {
-      if (q && !`${p.name} ${p.storage ?? ''} ${p.category}`.toLowerCase().includes(q)) return false;
-      if (filters.categories.length && !filters.categories.includes(p.category)) return false;
-      if (filters.conditions.length && (!p.condition || !filters.conditions.includes(p.condition))) return false;
-      if (filters.storages.length && (!p.storage || !filters.storages.includes(p.storage))) return false;
-      if (filters.variants.length && !filters.variants.some((v) => p.name.toLowerCase().includes(v.toLowerCase()))) return false;
-      if (p.price < min || p.price > max) return false;
-      if (filters.inStockOnly && p.stock <= 0) return false;
-      return true;
-    });
-
-    switch (sort) {
-      case 'price-asc': list = [...list].sort((a, b) => a.price - b.price); break;
-      case 'price-desc': list = [...list].sort((a, b) => b.price - a.price); break;
-      case 'name': list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
-      default:
-        list = [...list].sort((a, b) =>
-          Number(b.isBestSeller) - Number(a.isBestSeller) || b.salesCount - a.salesCount,
-        );
-        break;
-    }
-    return list;
-  }, [products, query, filters, sort]);
-
-  function clearFilters() {
-    setFilters({
-      categories: [],
-      conditions: [],
-      storages: [],
-      variants: [],
-      minPrice: '',
-      maxPrice: '',
-      inStockOnly: false,
-    });
-    setQuery('');
-  }
-
-  const crumbs = [
-    { label: 'Home', href: '/' },
-    { label: filters.categories.length === 1 ? filters.categories[0] : 'Shop' },
-  ];
-
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-10">
-      <Breadcrumbs items={crumbs} />
-      <div className="mt-3 mb-8 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-extrabold text-ink-900 md:text-4xl">
-            {filters.categories.length === 1 ? filters.categories[0] : 'Shop all'}
-          </h1>
-          <p className="mt-1 text-sm text-ink-500">Hand-tested. Graded. Ships worldwide.</p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search within results"
-            className="input w-56"
-          />
-          <label className="sr-only" htmlFor="sort">Sort</label>
-          <select
-            id="sort"
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="input w-48"
-          >
-            <option value="featured">Sort: Best sellers</option>
-            <option value="price-asc">Price: low → high</option>
-            <option value="price-desc">Price: high → low</option>
-            <option value="name">Name: A–Z</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="grid gap-8 md:grid-cols-[260px_1fr]">
-        <FilterSidebar
-          categories={categories}
-          storages={storages}
-          filters={filters}
-          onChange={setFilters}
-          onClear={clearFilters}
-          count={filtered.length}
-          total={products.length}
-        />
-
-        <section>
-          {loading ? (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="card animate-pulse">
-                  <div className="aspect-square bg-ink-50" />
-                  <div className="space-y-2 p-4">
-                    <div className="h-3 w-1/3 rounded bg-ink-50" />
-                    <div className="h-4 w-2/3 rounded bg-ink-50" />
-                    <div className="h-5 w-1/2 rounded bg-ink-50" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="card p-10 text-center">
-              <h3 className="text-lg font-semibold">No matches</h3>
-              <p className="mt-1 text-sm text-ink-500">Try clearing filters or searching a different keyword.</p>
-              <button onClick={clearFilters} className="btn-ghost mt-4">Clear filters</button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
-  );
-}
+const SORT_OPTIONS = [
+  { value: 'featured',   label: 'Featured' },
+  { value: 'newest',     label: 'Newest' },
+  { value: 'price-asc',  label: 'Price: Low → High' },
+  { value: 'price-desc', label: 'Price: High → Low' },
+];
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-10">Loading…</div>}>
-      <ShopInner />
+    <Suspense fallback={<div className="container-site py-20 text-center text-sm text-charcoal-400">Loading shop…</div>}>
+      <ShopContent />
     </Suspense>
+  );
+}
+
+function ShopContent() {
+  const searchParams = useSearchParams();
+
+  const [category, setCategory] = useState(searchParams.get('category') ?? '');
+  const [q, setQ] = useState(searchParams.get('q') ?? '');
+  const [sort, setSort] = useState(searchParams.get('sort') ?? 'featured');
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['products', 'all'],
+    queryFn: async () => {
+      const res = await fetch('/api/products');
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.products ?? data ?? [];
+    },
+    staleTime: 60_000,
+  });
+
+  const filtered = useMemo(() => {
+    let list = [...products];
+
+    if (category) {
+      list = list.filter(
+        (p) => (p.category ?? p.category) === category,
+      );
+    }
+    if (q.trim()) {
+      const lower = q.trim().toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.name?.toLowerCase().includes(lower) ||
+          p.category?.toLowerCase().includes(lower) ||
+          p.brand?.toLowerCase().includes(lower) ||
+          p.tags?.some?.((t) => t.toLowerCase().includes(lower)),
+      );
+    }
+    if (inStockOnly) list = list.filter((p) => (p.stock ?? 0) > 0);
+
+    switch (sort) {
+      case 'newest':
+        list.sort((a, b) =>
+          (b.createdAt ?? b.created_at ?? '').localeCompare(a.createdAt ?? a.created_at ?? ''),
+        );
+        break;
+      case 'price-asc':
+        list.sort((a, b) => (a.price ?? a.selling_price ?? 0) - (b.price ?? b.selling_price ?? 0));
+        break;
+      case 'price-desc':
+        list.sort((a, b) => (b.price ?? b.selling_price ?? 0) - (a.price ?? a.selling_price ?? 0));
+        break;
+      default:
+        list.sort(
+          (a, b) =>
+            Number(b.isBestSeller ?? b.is_best_seller ?? 0) -
+            Number(a.isBestSeller ?? a.is_best_seller ?? 0),
+        );
+    }
+
+    return list;
+  }, [products, category, q, inStockOnly, sort]);
+
+  const hasFilters = !!category || !!q || inStockOnly || sort !== 'featured';
+
+  function clearFilters() {
+    setCategory('');
+    setQ('');
+    setInStockOnly(false);
+    setSort('featured');
+  }
+
+  const FilterPanel = () => (
+    <div className="space-y-6">
+      <div>
+        <p className="label">Category</p>
+        <div className="mt-2 space-y-0.5">
+          <button
+            onClick={() => setCategory('')}
+            className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
+              !category
+                ? 'bg-charcoal-900 font-semibold text-white'
+                : 'text-charcoal-700 hover:bg-charcoal-50'
+            }`}
+          >
+            All Products
+          </button>
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.value}
+              onClick={() => setCategory(category === cat.value ? '' : cat.value)}
+              className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
+                category === cat.value
+                  ? 'bg-charcoal-900 font-semibold text-white'
+                  : 'text-charcoal-700 hover:bg-charcoal-50'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="border-t border-charcoal-100 pt-5">
+        <label className="flex cursor-pointer items-center gap-3">
+          <input
+            type="checkbox"
+            checked={inStockOnly}
+            onChange={(e) => setInStockOnly(e.target.checked)}
+            className="h-4 w-4 rounded border-charcoal-300 accent-charcoal-900"
+          />
+          <span className="text-sm font-medium text-charcoal-700">In stock only</span>
+        </label>
+      </div>
+
+      {hasFilters && (
+        <button
+          onClick={clearFilters}
+          className="flex items-center gap-1.5 text-xs text-charcoal-500 hover:text-charcoal-900"
+        >
+          <X size={13} />
+          Clear all filters
+        </button>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="border-b border-charcoal-100 bg-charcoal-50 py-10">
+        <div className="container-site">
+          <h1 className="text-3xl font-black tracking-tight text-charcoal-900 md:text-4xl">
+            {category
+              ? CATEGORIES.find((c) => c.value === category)?.label ?? category
+              : 'All Products'}
+          </h1>
+          <p className="mt-1 text-sm text-charcoal-500">
+            {isLoading
+              ? 'Loading…'
+              : `${filtered.length} product${filtered.length !== 1 ? 's' : ''}`}
+          </p>
+        </div>
+      </div>
+
+      <div className="container-site py-8">
+        {/* Toolbar */}
+        <div className="mb-6 flex flex-wrap items-center gap-3">
+          <div className="relative min-w-0 flex-1 max-w-xs">
+            <Search
+              size={14}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal-400"
+            />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search products…"
+              className="input-sm pl-9"
+            />
+          </div>
+
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="input-sm w-auto cursor-pointer"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={() => setMobileFiltersOpen((o) => !o)}
+            className="btn-secondary-sm flex items-center gap-1.5 lg:hidden"
+          >
+            <SlidersHorizontal size={14} />
+            Filters
+          </button>
+        </div>
+
+        {/* Mobile filter panel */}
+        {mobileFiltersOpen && (
+          <div className="mb-6 rounded-2xl border border-charcoal-100 bg-white p-5 shadow-card animate-fade-in lg:hidden">
+            <FilterPanel />
+          </div>
+        )}
+
+        <div className="flex gap-8">
+          {/* Desktop sidebar */}
+          <aside className="hidden w-48 flex-shrink-0 lg:block">
+            <FilterPanel />
+          </aside>
+
+          {/* Product grid */}
+          <div className="flex-1 min-w-0">
+            {isLoading ? (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="h-72 animate-pulse rounded-2xl bg-charcoal-100" />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="py-24 text-center">
+                <p className="text-3xl font-black text-charcoal-200">No results</p>
+                <p className="mt-2 text-sm text-charcoal-500">
+                  Try different filters or a broader search.
+                </p>
+                <button onClick={clearFilters} className="mt-5 btn-secondary-sm">
+                  Clear filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                {filtered.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

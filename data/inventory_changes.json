@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ch_1777736133051",
+    "productId": "p_001",
+    "sku": "p_001",
+    "changeType": "adjustment",
+    "quantityBefore": 0,
+    "quantityAfter": 3,
+    "delta": 3,
+    "note": "",
+    "changedBy": "inventory-dashboard",
+    "createdAt": "2026-05-02T15:35:33.051Z"
+  },
+  {
+    "id": "ch_1777736147949",
+    "productId": "p_007",
+    "sku": "p_007",
+    "changeType": "restock",
+    "quantityBefore": 0,
+    "quantityAfter": 4,
+    "delta": 4,
+    "note": "",
+    "changedBy": "inventory-dashboard",
+    "createdAt": "2026-05-02T15:35:47.949Z"
+  }
+]

@@ -7,7 +7,11 @@
     "condition": "A",
     "price": 749,
     "quantity": 3,
-    "image": "/placeholder.svg"
+    "image": "/placeholder.svg",
+    "stock": 0,
+    "updatedAt": "2026-05-02T15:35:33.048Z",
+    "archivedAt": "2026-05-02T15:39:43.653Z",
+    "is_active": false
   },
   {
     "id": "p_002",
@@ -17,7 +21,22 @@
     "condition": "A",
     "price": 829,
     "quantity": 2,
-    "image": "/placeholder.svg"
+    "image": "/placeholder.svg",
+    "name": "Iphone 14 Pro Max",
+    "brand": "",
+    "compare_at_price": null,
+    "stock": 0,
+    "sku": "",
+    "description": "",
+    "image_url": "https://images.unsplash.com/photo-1609692814858-f7cd2f0afa4f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "isBestSeller": false,
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1609692814858-f7cd2f0afa4f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "alt": "Iphone 14 Pro Max"
+      }
+    ],
+    "updatedAt": "2026-05-02T16:56:59.060Z"
   },
   {
     "id": "p_003",
@@ -27,7 +46,9 @@
     "condition": "B",
     "price": 879,
     "quantity": 1,
-    "image": "/placeholder.svg"
+    "image": "/placeholder.svg",
+    "archivedAt": "2026-05-02T16:21:48.389Z",
+    "is_active": false
   },
   {
     "id": "p_004",
@@ -67,7 +88,11 @@
     "condition": "A",
     "price": 19,
     "quantity": 19,
-    "image": "/placeholder.svg"
+    "image": "/placeholder.svg",
+    "stock": 4,
+    "updatedAt": "2026-05-02T15:35:47.947Z",
+    "archivedAt": "2026-05-02T15:45:47.187Z",
+    "is_active": false
   },
   {
     "id": "p_008",
@@ -77,7 +102,9 @@
     "condition": "A",
     "price": 12,
     "quantity": 40,
-    "image": "/placeholder.svg"
+    "image": "/placeholder.svg",
+    "archivedAt": "2026-05-02T15:45:42.896Z",
+    "is_active": false
   },
   {
     "id": "p_009",
@@ -87,7 +114,9 @@
     "condition": "A",
     "price": 199,
     "quantity": 8,
-    "image": "/placeholder.svg"
+    "image": "/placeholder.svg",
+    "archivedAt": "2026-05-02T15:45:40.327Z",
+    "is_active": false
   },
   {
     "id": "p_a4651fb5",
@@ -97,6 +126,36 @@
     "condition": "A",
     "price": 1400,
     "quantity": 4,
-    "image": "/Apple-iPhone-13-Pro-Unlocked.png"
+    "image": "/Apple-iPhone-13-Pro-Unlocked.png",
+    "archivedAt": "2026-05-02T15:45:36.983Z",
+    "is_active": false
+  },
+  {
+    "id": "p_mooih50pb64gk4",
+    "slug": "iphone-12-pro-max",
+    "name": "iPhone 12 Pro Max",
+    "category": "iPhone",
+    "brand": "Apple",
+    "sku": "ME-012",
+    "description": "Key item features\n\n    iOS 15.4\n    3.0 GHz Apple A14 Bionic\n    Pro 12MP camera system: Ultra Wide, Wide, and Telephoto cameras\n    6.7-inch Super Retina XDR display\n    128GB Storage Capacity",
+    "bullets": [],
+    "image_url": "https://images.unsplash.com/photo-1609692814858-f7cd2f0afa4f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1609692814858-f7cd2f0afa4f?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "alt": "iPhone 12 Pro Max"
+      }
+    ],
+    "price": 420,
+    "compare_at_price": 540,
+    "currency": "USD",
+    "stock": 3,
+    "lowStockThreshold": 3,
+    "isBestSeller": true,
+    "is_active": true,
+    "tags": [],
+    "compatibility": [],
+    "createdAt": "2026-05-02T15:43:27.145Z",
+    "updatedAt": "2026-05-02T15:43:27.145Z"
   }
 ]

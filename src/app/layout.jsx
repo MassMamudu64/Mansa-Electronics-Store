@@ -1,15 +1,15 @@
 import './globals.css';
-import AnnouncementBar from '@/components/AnnouncementBar';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Toaster } from 'sonner';
+import StoreShell from '@/components/StoreShell';
+import QueryProvider from '@/providers/QueryProvider';
 
 export const metadata = {
-  title: 'Mansa Electronics — Premium iPhones & accessories',
+  title: 'Mansa Electronics — Premium Mobile Accessories',
   description:
-    'Hand-tested iPhones and Apple accessories, graded A/B/C, shipped worldwide. Backed by a 12-month limited warranty.',
+    'Smartphones, chargers, audio accessories, cases, cables, and power banks. Shop Mansa Electronics for premium mobile tech.',
   openGraph: {
     title: 'Mansa Electronics',
-    description: 'Premium, hand-tested iPhones and accessories.',
+    description: 'Premium mobile electronics and accessories.',
     type: 'website',
   },
 };
@@ -25,11 +25,11 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-white font-sans text-ink-900 antialiased">
-        <AnnouncementBar />
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+      <body className="min-h-screen bg-white font-sans text-charcoal-900 antialiased">
+        <QueryProvider>
+          <StoreShell>{children}</StoreShell>
+          <Toaster position="top-right" richColors />
+        </QueryProvider>
       </body>
     </html>
   );

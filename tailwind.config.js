@@ -4,50 +4,37 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Brand
-        gold: {
-          50: '#FBF7EA',
-          100: '#F6EFC9',
-          200: '#ECDF93',
-          300: '#E0CB5D',
-          400: '#D6BA3B',
-          500: '#C9A227', // primary gold
-          600: '#A8851C',
-          700: '#826816',
-          800: '#5E4B11',
-          900: '#3D310B',
-          DEFAULT: '#C9A227',
+        charcoal: {
+          950: '#0a0a0a',
+          900: '#111111',
+          800: '#1c1c1e',
+          700: '#2c2c2e',
+          600: '#3a3a3c',
+          500: '#636366',
+          400: '#8e8e93',
+          300: '#aeaeb2',
+          200: '#c7c7cc',
+          100: '#e5e5ea',
+          50:  '#f2f2f7',
         },
-        ink: {
-          50: '#F4F5F7',
-          100: '#E4E7EC',
-          200: '#C9CDD6',
-          300: '#9BA2B0',
-          400: '#6B7280',
-          500: '#4B5563',
-          600: '#2D3340',
-          700: '#1A1E27',
-          800: '#12151C',
-          900: '#0A0E17', // near-black navy
-          DEFAULT: '#0A0E17',
-        },
-        cream: '#FBFAF6',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-        display: ['"Inter"', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        card: '0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06)',
-        'card-lg': '0 4px 6px -1px rgb(15 23 42 / 0.07), 0 2px 4px -2px rgb(15 23 42 / 0.06)',
-        'card-hover': '0 10px 20px -8px rgb(15 23 42 / 0.18)',
+        product: '0 2px 8px 0 rgb(0 0 0 / 0.07)',
+        'product-hover': '0 12px 32px 0 rgb(0 0 0 / 0.14)',
+        card: '0 1px 3px 0 rgb(0 0 0 / 0.06)',
+        'card-lg': '0 4px 12px 0 rgb(0 0 0 / 0.08)',
+        'admin-sidebar': '2px 0 8px 0 rgb(0 0 0 / 0.08)',
       },
-      borderRadius: {
-        xl: '14px',
-        '2xl': '20px',
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.4s ease-out',
       },
-      letterSpacing: {
-        widest: '0.2em',
+      keyframes: {
+        fadeIn: { from: { opacity: '0' }, to: { opacity: '1' } },
+        slideUp: { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
       },
     },
   },
