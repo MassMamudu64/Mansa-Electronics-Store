@@ -1,5 +1,4 @@
 import './globals.css';
-import { CartProvider } from '@/context/CartContext';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -27,12 +26,10 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="min-h-screen bg-white font-sans text-ink-900 antialiased">
-        <CartProvider>
-          <AnnouncementBar />
-          <Navbar />
-          <main>{children}</main>
-          <Footer />
-        </CartProvider>
+        <AnnouncementBar />
+        <Navbar />
+        <main>{children}</main>
+        <Footer />
       </body>
     </html>
   );

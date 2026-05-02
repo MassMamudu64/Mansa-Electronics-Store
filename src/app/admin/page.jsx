@@ -1,19 +1,36 @@
 'use client';
 
-// NOTE: No auth — spec calls for open admin in MVP. Put behind middleware
-// before exposing publicly.
+// Auth gate is enforced by middleware.ts when Supabase is configured.
+// In local mode, this page is unsecured — see admin/layout.jsx for the mode chip.
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { productService } from '@/services/productService';
+import { formatPrice } from '@/lib/money';
+
+const CATEGORIES = ['iPhone', 'Android', 'Accessories', 'Cases', 'Chargers', 'Cables', 'Audio', 'PowerBanks', 'LaptopGear'];
+const CONDITIONS = ['New', 'A', 'B', 'C'];
 
 const EMPTY = {
   category: 'iPhone',
-  model: '',
+  name: '',
   storage: '',
   condition: 'A',
   price: '',
-  quantity: '',
-  image: '/placeholder.svg',
+  stock: '',
+  imageUrl: '/Apple-iPhone-13-Pro-Unlocked.png',
+  isBestSeller: false,
 };
+
+function slugify(s) {
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+function deviceTypeFor(category) {
+  if (category === 'iPhone') return 'iPhone';
+  if (category === 'Android') return 'Android';
+  if (category === 'LaptopGear') return 'Laptop';
+  return 'Universal';
+}
 
 export default function AdminPage() {
   const [products, setProducts] = useState([]);
@@ -25,8 +42,7 @@ export default function AdminPage() {
 
   async function load() {
     setLoading(true);
-    const r = await fetch('/api/products');
-    setProducts(await r.json());
+    setProducts(await productService.getAll());
     setLoading(false);
   }
   useEffect(() => { load(); }, []);
@@ -36,56 +52,101 @@ export default function AdminPage() {
   async function save(e) {
     e.preventDefault();
     setError('');
-    if (!draft.model.trim()) return setError('Model is required');
+    if (!draft.name.trim()) return setError('Name is required');
     if (draft.price === '' || Number(draft.price) < 0) return setError('Price must be ≥ 0');
-    if (draft.quantity === '' || Number(draft.quantity) < 0) return setError('Quantity must be ≥ 0');
+    if (draft.stock === '' || Number(draft.stock) < 0) return setError('Stock must be ≥ 0');
 
-    const payload = { ...draft, price: Number(draft.price), quantity: Number(draft.quantity) };
-    const res = editingId
-      ? await fetch(`/api/products/${editingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      : await fetch('/api/products', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    if (!res.ok) { setError((await res.json()).error || 'Save failed'); return; }
-    reset();
-    load();
+    const slugBase = `${draft.name}${draft.storage ? `-${draft.storage}` : ''}-${draft.condition}`;
+
+    try {
+      if (editingId) {
+        await productService.update(editingId, {
+          name: draft.name.trim(),
+          category: draft.category,
+          condition: draft.condition,
+          storage: draft.storage || undefined,
+          price: Number(draft.price),
+          stock: Number(draft.stock),
+          isBestSeller: draft.isBestSeller,
+          deviceType: deviceTypeFor(draft.category),
+          images: [{ url: draft.imageUrl, alt: draft.name.trim() }],
+        });
+      } else {
+        await productService.create({
+          slug: slugify(slugBase),
+          name: draft.name.trim(),
+          category: draft.category,
+          deviceType: deviceTypeFor(draft.category),
+          compatibility: [],
+          price: Number(draft.price),
+          currency: 'USD',
+          condition: draft.condition,
+          storage: draft.storage || undefined,
+          stock: Number(draft.stock),
+          lowStockThreshold: 3,
+          images: [{ url: draft.imageUrl, alt: draft.name.trim() }],
+          description: '',
+          bullets: [],
+          tags: [],
+          isBestSeller: draft.isBestSeller,
+          bundleIds: [],
+        });
+      }
+      reset();
+      load();
+    } catch (err) {
+      setError(err.message || 'Save failed');
+    }
   }
 
   async function remove(id) {
     if (!confirm('Delete this product?')) return;
-    await fetch(`/api/products/${id}`, { method: 'DELETE' });
+    await productService.hardDelete(id);
     load();
   }
 
-  async function adjustQty(id, delta) {
+  async function adjustStock(id, delta) {
     const p = products.find((x) => x.id === id);
     if (!p) return;
-    const next = Math.max(0, p.quantity + delta);
-    await fetch(`/api/products/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quantity: next }),
-    });
+    const next = Math.max(0, p.stock + delta);
+    await productService.update(id, { stock: next });
+    load();
+  }
+
+  async function toggleBestSeller(p) {
+    await productService.update(p.id, { isBestSeller: !p.isBestSeller });
     load();
   }
 
   function edit(p) {
     setEditingId(p.id);
-    setDraft({ ...p, price: String(p.price), quantity: String(p.quantity) });
+    setDraft({
+      category: p.category,
+      name: p.name,
+      storage: p.storage ?? '',
+      condition: p.condition ?? 'A',
+      price: String(p.price),
+      stock: String(p.stock),
+      imageUrl: p.images?.[0]?.url ?? '/placeholder.svg',
+      isBestSeller: !!p.isBestSeller,
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // KPIs
   const kpis = useMemo(() => {
-    const totalUnits = products.reduce((s, p) => s + p.quantity, 0);
-    const inventoryValue = products.reduce((s, p) => s + p.price * p.quantity, 0);
-    const low = products.filter((p) => p.quantity > 0 && p.quantity <= 3).length;
-    const oos = products.filter((p) => p.quantity === 0).length;
+    const totalUnits = products.reduce((s, p) => s + p.stock, 0);
+    const inventoryValue = products.reduce((s, p) => s + p.price * p.stock, 0);
+    const low = products.filter((p) => p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 3)).length;
+    const oos = products.filter((p) => p.stock === 0).length;
     return { totalUnits, inventoryValue, low, oos, total: products.length };
   }, [products]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return products;
-    return products.filter((p) => `${p.model} ${p.storage} ${p.category} ${p.id}`.toLowerCase().includes(q));
+    return products.filter((p) =>
+      `${p.name} ${p.storage ?? ''} ${p.category} ${p.id} ${p.slug}`.toLowerCase().includes(q),
+    );
   }, [products, query]);
 
   return (
@@ -94,7 +155,6 @@ export default function AdminPage() {
         <div>
           <span className="eyebrow">Dashboard</span>
           <h1 className="mt-1 text-3xl font-extrabold">Inventory admin</h1>
-          <p className="mt-1 text-xs text-ink-400">Unsecured MVP — do not expose publicly.</p>
         </div>
         <Link href="/" className="btn-ghost">View storefront →</Link>
       </div>
@@ -103,8 +163,12 @@ export default function AdminPage() {
       <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Products" value={kpis.total} />
         <Kpi label="Total units" value={kpis.totalUnits} />
-        <Kpi label="Inventory value" value={`$${kpis.inventoryValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} />
-        <Kpi label="Low / out of stock" value={`${kpis.low} low · ${kpis.oos} OOS`} tone={kpis.oos > 0 ? 'rose' : kpis.low > 0 ? 'amber' : 'emerald'} />
+        <Kpi label="Inventory value" value={formatPrice(kpis.inventoryValue)} />
+        <Kpi
+          label="Low / out of stock"
+          value={`${kpis.low} low · ${kpis.oos} OOS`}
+          tone={kpis.oos > 0 ? 'rose' : kpis.low > 0 ? 'amber' : 'emerald'}
+        />
       </div>
 
       {/* Form */}
@@ -118,18 +182,32 @@ export default function AdminPage() {
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-7">
           <select className="input md:col-span-1" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })}>
-            <option>iPhone</option>
-            <option>Accessories</option>
+            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <input className="input md:col-span-2" placeholder="Model (e.g. iPhone 14 Pro)" value={draft.model} onChange={(e) => setDraft({ ...draft, model: e.target.value })} />
+          <input className="input md:col-span-2" placeholder="Name (e.g. iPhone 14 Pro)" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
           <input className="input md:col-span-1" placeholder="Storage" value={draft.storage} onChange={(e) => setDraft({ ...draft, storage: e.target.value })} />
           <select className="input md:col-span-1" value={draft.condition} onChange={(e) => setDraft({ ...draft, condition: e.target.value })}>
-            <option value="A">Grade A</option>
-            <option value="B">Grade B</option>
-            <option value="C">Grade C</option>
+            {CONDITIONS.map((c) => <option key={c} value={c}>{c === 'New' ? 'New' : `Grade ${c}`}</option>)}
           </select>
           <input className="input md:col-span-1" type="number" step="0.01" placeholder="Price" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} />
-          <input className="input md:col-span-1" type="number" placeholder="Qty" value={draft.quantity} onChange={(e) => setDraft({ ...draft, quantity: e.target.value })} />
+          <input className="input md:col-span-1" type="number" placeholder="Stock" value={draft.stock} onChange={(e) => setDraft({ ...draft, stock: e.target.value })} />
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-7">
+          <input
+            className="input md:col-span-5"
+            placeholder="Image URL (e.g. /Apple-iPhone-13-Pro-Unlocked.png)"
+            value={draft.imageUrl}
+            onChange={(e) => setDraft({ ...draft, imageUrl: e.target.value })}
+          />
+          <label className="md:col-span-2 inline-flex items-center gap-2 px-2 text-sm text-ink-700">
+            <input
+              type="checkbox"
+              checked={draft.isBestSeller}
+              onChange={(e) => setDraft({ ...draft, isBestSeller: e.target.checked })}
+            />
+            Mark as best seller
+          </label>
         </div>
 
         {error && (
@@ -156,47 +234,59 @@ export default function AdminPage() {
           <table className="w-full text-sm">
             <thead className="bg-white text-xs uppercase tracking-widest text-ink-400">
               <tr className="border-b border-ink-100">
-                <th className="p-3 text-left">Model</th>
+                <th className="p-3 text-left">Name</th>
                 <th className="p-3 text-left">Category</th>
                 <th className="p-3 text-left">Storage</th>
                 <th className="p-3 text-left">Condition</th>
                 <th className="p-3 text-right">Price</th>
-                <th className="p-3 text-center">Quantity</th>
+                <th className="p-3 text-center">Stock</th>
+                <th className="p-3 text-center">Best</th>
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {loading && <tr><td colSpan={7} className="p-6 text-center text-ink-400">Loading…</td></tr>}
+              {loading && <tr><td colSpan={8} className="p-6 text-center text-ink-400">Loading…</td></tr>}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={7} className="p-6 text-center text-ink-400">No products match.</td></tr>
+                <tr><td colSpan={8} className="p-6 text-center text-ink-400">No products match.</td></tr>
               )}
               {filtered.map((p) => {
-                const low = p.quantity > 0 && p.quantity <= 3;
-                const oos = p.quantity === 0;
+                const low = p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 3);
+                const oos = p.stock === 0;
                 return (
                   <tr key={p.id} className="border-t border-ink-100 hover:bg-cream/50">
                     <td className="p-3">
-                      <div className="font-semibold text-ink-900">{p.model}</div>
-                      <div className="text-[11px] text-ink-400">{p.id}</div>
+                      <div className="font-semibold text-ink-900">{p.name}</div>
+                      <div className="text-[11px] text-ink-400">{p.slug}</div>
                     </td>
                     <td className="p-3 text-ink-700">{p.category}</td>
-                    <td className="p-3 text-ink-700">{p.storage}</td>
+                    <td className="p-3 text-ink-700">{p.storage ?? '—'}</td>
                     <td className="p-3">
-                      <span className={`badge ${p.condition === 'A' ? 'badge-green' : p.condition === 'B' ? 'badge-amber' : 'badge-rose'}`}>
-                        Grade {p.condition}
-                      </span>
+                      {p.condition ? (
+                        <span className={`badge ${p.condition === 'A' ? 'badge-green' : p.condition === 'B' ? 'badge-amber' : p.condition === 'C' ? 'badge-rose' : 'badge-ink'}`}>
+                          {p.condition === 'New' ? 'New' : `Grade ${p.condition}`}
+                        </span>
+                      ) : '—'}
                     </td>
-                    <td className="p-3 text-right font-semibold text-gold-700">${p.price.toFixed(2)}</td>
+                    <td className="p-3 text-right font-semibold text-gold-700">{formatPrice(p.price, p.currency)}</td>
                     <td className="p-3">
                       <div className="inline-flex items-center gap-1">
-                        <button className="h-7 w-7 rounded-full border border-ink-100 hover:border-ink-900" onClick={() => adjustQty(p.id, -1)}>−</button>
+                        <button className="h-7 w-7 rounded-full border border-ink-100 hover:border-ink-900" onClick={() => adjustStock(p.id, -1)}>−</button>
                         <span className={`w-10 text-center font-semibold ${oos ? 'text-rose-600' : low ? 'text-amber-600' : 'text-ink-900'}`}>
-                          {p.quantity}
+                          {p.stock}
                         </span>
-                        <button className="h-7 w-7 rounded-full border border-ink-100 hover:border-ink-900" onClick={() => adjustQty(p.id, 1)}>+</button>
+                        <button className="h-7 w-7 rounded-full border border-ink-100 hover:border-ink-900" onClick={() => adjustStock(p.id, 1)}>+</button>
                       </div>
                       {oos && <div className="mt-1 text-[10px] font-semibold text-rose-600">Out of stock</div>}
                       {low && <div className="mt-1 text-[10px] font-semibold text-amber-600">Low stock</div>}
+                    </td>
+                    <td className="p-3 text-center">
+                      <button
+                        onClick={() => toggleBestSeller(p)}
+                        className={`text-base ${p.isBestSeller ? 'text-gold-600' : 'text-ink-200 hover:text-ink-400'}`}
+                        aria-label={p.isBestSeller ? 'Unmark best seller' : 'Mark best seller'}
+                      >
+                        ★
+                      </button>
                     </td>
                     <td className="p-3 text-right">
                       <button className="btn-link mr-3" onClick={() => edit(p)}>Edit</button>

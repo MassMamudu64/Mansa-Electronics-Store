@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useCart } from '@/context/CartContext';
+import { useCartStore, selectItemCount, useCartHasHydrated } from '@/store/cartStore';
 import Logo from './Logo';
 
 const NAV = [
@@ -14,7 +14,8 @@ const NAV = [
 ];
 
 export default function Navbar() {
-  const { count, hydrated } = useCart();
+  const count = useCartStore(selectItemCount);
+  const hydrated = useCartHasHydrated();
   const router = useRouter();
   const [q, setQ] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);

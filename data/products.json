@@ -6,7 +6,7 @@
     "storage": "128GB",
     "condition": "A",
     "price": 749,
-    "quantity": 4,
+    "quantity": 3,
     "image": "/placeholder.svg"
   },
   {
@@ -16,7 +16,7 @@
     "storage": "256GB",
     "condition": "A",
     "price": 829,
-    "quantity": 3,
+    "quantity": 2,
     "image": "/placeholder.svg"
   },
   {
@@ -26,7 +26,7 @@
     "storage": "256GB",
     "condition": "B",
     "price": 879,
-    "quantity": 2,
+    "quantity": 1,
     "image": "/placeholder.svg"
   },
   {
@@ -36,7 +36,7 @@
     "storage": "128GB",
     "condition": "A",
     "price": 949.07,
-    "quantity": 5,
+    "quantity": 4,
     "image": "/placeholder.svg"
   },
   {
@@ -83,10 +83,20 @@
     "id": "p_009",
     "category": "Accessories",
     "model": "AirPods Pro (2nd gen)",
-    "storage": "-",
+    "storage": "256",
     "condition": "A",
     "price": 199,
     "quantity": 8,
     "image": "/placeholder.svg"
+  },
+  {
+    "id": "p_a4651fb5",
+    "category": "iPhone",
+    "model": "iPhone 17 Pro Max ",
+    "storage": "2TB",
+    "condition": "A",
+    "price": 1400,
+    "quantity": 4,
+    "image": "/Apple-iPhone-13-Pro-Unlocked.png"
   }
 ]

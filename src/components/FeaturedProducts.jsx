@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { productService } from '@/services/productService';
 import ProductCard from './ProductCard';
 
 export default function FeaturedProducts() {
@@ -9,16 +10,14 @@ export default function FeaturedProducts() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/products')
-      .then((r) => r.json())
-      .then((data) => setItems(data))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    productService.getBestSellers(8).then((data) => {
+      if (cancelled) return;
+      setItems(data);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
   }, []);
-
-  // Pick the 8 freshest / in-stock products for the rail.
-  const featured = items
-    .filter((p) => p.quantity > 0)
-    .slice(0, 8);
 
   return (
     <section className="section bg-cream">
@@ -46,7 +45,7 @@ export default function FeaturedProducts() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {featured.map((p) => <ProductCard key={p.id} product={p} />)}
+            {items.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         )}
       </div>

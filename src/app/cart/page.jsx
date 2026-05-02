@@ -1,11 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-import { useCart } from '@/context/CartContext';
+import {
+  useCartStore,
+  selectItems,
+  selectItemCount,
+  selectSubtotal,
+  useCartHasHydrated,
+} from '@/store/cartStore';
+import { cartService } from '@/services/cartService';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 export default function CartPage() {
-  const { items, setQty, remove, subtotal, count, hydrated } = useCart();
+  const items = useCartStore(selectItems);
+  const subtotal = useCartStore(selectSubtotal);
+  const count = useCartStore(selectItemCount);
+  const hydrated = useCartHasHydrated();
+  const setQty = (productId, qty) => cartService.updateQuantity(productId, qty);
+  const remove = (productId) => cartService.remove(productId);
 
   if (!hydrated) {
     return <div className="mx-auto max-w-7xl px-4 py-20 text-ink-400">Loading cart…</div>;
@@ -38,26 +50,29 @@ export default function CartPage() {
         <section>
           <ul className="space-y-3">
             {items.map((i) => (
-              <li key={i.id} className="card flex items-center gap-4 p-4">
-                <Link href={`/product/${i.id}`} className="shrink-0">
+              <li key={i.productId} className="card flex items-center gap-4 p-4">
+                <Link href={`/product/${i.productId}`} className="shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={i.image || '/placeholder.svg'} alt={i.model} className="h-24 w-24 rounded-lg object-cover bg-cream" />
+                  <img src={i.image || '/placeholder.svg'} alt={i.name} className="h-24 w-24 rounded-lg object-cover bg-cream" />
                 </Link>
                 <div className="flex-1">
-                  <div className="text-[11px] uppercase tracking-widest text-ink-400">
-                    {i.storage && i.storage !== '-' ? `${i.storage} · ` : ''}Grade {i.condition}
-                  </div>
-                  <Link href={`/product/${i.id}`} className="font-semibold text-ink-900 hover:text-gold-700">{i.model}</Link>
-                  <div className="mt-1 text-sm text-ink-500">${i.price.toFixed(2)} each</div>
+                  {(i.storage || i.condition) && (
+                    <div className="text-[11px] uppercase tracking-widest text-ink-400">
+                      {i.storage && i.storage !== '-' ? `${i.storage} · ` : ''}
+                      {i.condition ? `Grade ${i.condition}` : ''}
+                    </div>
+                  )}
+                  <Link href={`/product/${i.productId}`} className="font-semibold text-ink-900 hover:text-gold-700">{i.name}</Link>
+                  <div className="mt-1 text-sm text-ink-500">${i.unitPrice.toFixed(2)} each</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="inline-flex items-center rounded-full border border-ink-100">
-                    <button className="h-9 w-9" onClick={() => setQty(i.id, i.quantity - 1)} aria-label="Decrease">−</button>
+                    <button className="h-9 w-9" onClick={() => setQty(i.productId, i.quantity - 1)} aria-label="Decrease">−</button>
                     <span className="w-8 text-center text-sm font-semibold">{i.quantity}</span>
-                    <button className="h-9 w-9" onClick={() => setQty(i.id, i.quantity + 1)} aria-label="Increase" disabled={i.maxQuantity && i.quantity >= i.maxQuantity}>+</button>
+                    <button className="h-9 w-9" onClick={() => setQty(i.productId, i.quantity + 1)} aria-label="Increase" disabled={i.maxQuantity != null && i.quantity >= i.maxQuantity}>+</button>
                   </div>
-                  <div className="w-20 text-right font-semibold">${(i.price * i.quantity).toFixed(2)}</div>
-                  <button className="text-xs text-ink-400 hover:text-rose-600" onClick={() => remove(i.id)} aria-label="Remove">
+                  <div className="w-20 text-right font-semibold">${(i.unitPrice * i.quantity).toFixed(2)}</div>
+                  <button className="text-xs text-ink-400 hover:text-rose-600" onClick={() => remove(i.productId)} aria-label="Remove">
                     ✕
                   </button>
                 </div>

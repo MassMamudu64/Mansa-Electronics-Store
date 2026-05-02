@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { productService } from '@/services/productService';
 import ProductCard from '@/components/ProductCard';
 import FilterSidebar from '@/components/FilterSidebar';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -27,13 +28,15 @@ function ShopInner() {
   });
 
   useEffect(() => {
-    fetch('/api/products')
-      .then((r) => r.json())
-      .then((data) => setProducts(data))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    productService.getAll().then((data) => {
+      if (cancelled) return;
+      setProducts(data);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
   }, []);
 
-  // Re-read URL params on client navigation
   useEffect(() => {
     const cat = params.get('category');
     const q = params.get('q') || '';
@@ -46,7 +49,7 @@ function ShopInner() {
     [products]
   );
   const storages = useMemo(
-    () => Array.from(new Set(products.map((p) => p.storage).filter((s) => s && s !== '-'))).sort(),
+    () => Array.from(new Set(products.map((p) => p.storage).filter(Boolean))).sort(),
     [products]
   );
 
@@ -55,21 +58,25 @@ function ShopInner() {
     const min = filters.minPrice === '' ? 0 : Number(filters.minPrice);
     const max = filters.maxPrice === '' ? Infinity : Number(filters.maxPrice);
     let list = products.filter((p) => {
-      if (q && !`${p.model} ${p.storage} ${p.category}`.toLowerCase().includes(q)) return false;
+      if (q && !`${p.name} ${p.storage ?? ''} ${p.category}`.toLowerCase().includes(q)) return false;
       if (filters.categories.length && !filters.categories.includes(p.category)) return false;
-      if (filters.conditions.length && !filters.conditions.includes(p.condition)) return false;
-      if (filters.storages.length && !filters.storages.includes(p.storage)) return false;
-      if (filters.variants.length && !filters.variants.some((v) => p.model.toLowerCase().includes(v.toLowerCase()))) return false;
+      if (filters.conditions.length && (!p.condition || !filters.conditions.includes(p.condition))) return false;
+      if (filters.storages.length && (!p.storage || !filters.storages.includes(p.storage))) return false;
+      if (filters.variants.length && !filters.variants.some((v) => p.name.toLowerCase().includes(v.toLowerCase()))) return false;
       if (p.price < min || p.price > max) return false;
-      if (filters.inStockOnly && p.quantity <= 0) return false;
+      if (filters.inStockOnly && p.stock <= 0) return false;
       return true;
     });
 
     switch (sort) {
       case 'price-asc': list = [...list].sort((a, b) => a.price - b.price); break;
       case 'price-desc': list = [...list].sort((a, b) => b.price - a.price); break;
-      case 'name': list = [...list].sort((a, b) => a.model.localeCompare(b.model)); break;
-      default: break; // "featured" — server order
+      case 'name': list = [...list].sort((a, b) => a.name.localeCompare(b.name)); break;
+      default:
+        list = [...list].sort((a, b) =>
+          Number(b.isBestSeller) - Number(a.isBestSeller) || b.salesCount - a.salesCount,
+        );
+        break;
     }
     return list;
   }, [products, query, filters, sort]);
@@ -118,7 +125,7 @@ function ShopInner() {
             onChange={(e) => setSort(e.target.value)}
             className="input w-48"
           >
-            <option value="featured">Sort: Featured</option>
+            <option value="featured">Sort: Best sellers</option>
             <option value="price-asc">Price: low → high</option>
             <option value="price-desc">Price: high → low</option>
             <option value="name">Name: A–Z</option>
