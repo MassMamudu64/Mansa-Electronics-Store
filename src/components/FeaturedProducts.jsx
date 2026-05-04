@@ -43,9 +43,6 @@ export default function FeaturedProducts({ title = 'Featured Products', tag = 'f
         ) : products.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-charcoal-200 py-20 text-center">
             <p className="text-sm text-charcoal-400">No featured products yet.</p>
-            <Link href="/admin/products" className="mt-3 inline-flex text-xs font-semibold text-charcoal-700 underline">
-              Add products in admin
-            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

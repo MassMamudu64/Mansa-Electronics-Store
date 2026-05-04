@@ -1,0 +1,139 @@
+-- CreateTable
+CREATE TABLE `products` (
+    `id` VARCHAR(191) NOT NULL,
+    `slug` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(200) NOT NULL,
+    `category` VARCHAR(50) NOT NULL,
+    `brand` VARCHAR(50) NULL,
+    `sku` VARCHAR(50) NULL,
+    `description` TEXT NULL,
+    `bullets` JSON NULL,
+    `image_url` VARCHAR(500) NULL,
+    `images` JSON NULL,
+    `price` DECIMAL(10, 2) NOT NULL,
+    `compare_at_price` DECIMAL(10, 2) NULL,
+    `currency` VARCHAR(3) NOT NULL DEFAULT 'USD',
+    `low_stock_threshold` INTEGER NOT NULL DEFAULT 3,
+    `is_best_seller` BOOLEAN NOT NULL DEFAULT false,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `tags` JSON NULL,
+    `compatibility` JSON NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+    `archived_at` DATETIME(3) NULL,
+
+    UNIQUE INDEX `products_slug_key`(`slug`),
+    UNIQUE INDEX `products_sku_key`(`sku`),
+    INDEX `products_category_idx`(`category`),
+    INDEX `products_is_active_idx`(`is_active`),
+    INDEX `products_archived_at_idx`(`archived_at`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `inventory` (
+    `id` VARCHAR(191) NOT NULL,
+    `product_id` VARCHAR(191) NOT NULL,
+    `stock` INTEGER NOT NULL DEFAULT 0,
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `inventory_product_id_key`(`product_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `orders` (
+    `id` VARCHAR(191) NOT NULL,
+    `short_code` VARCHAR(191) NOT NULL,
+    `customer_name` VARCHAR(100) NOT NULL,
+    `customer_email` VARCHAR(254) NOT NULL,
+    `customer_phone` VARCHAR(30) NOT NULL,
+    `customer_address` VARCHAR(500) NOT NULL,
+    `customer_notes` TEXT NULL,
+    `subtotal` DECIMAL(10, 2) NOT NULL,
+    `bundle_discount` DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    `delivery` DECIMAL(10, 2) NOT NULL,
+    `total` DECIMAL(10, 2) NOT NULL,
+    `status` ENUM('pending', 'confirmed', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `orders_short_code_key`(`short_code`),
+    INDEX `orders_status_idx`(`status`),
+    INDEX `orders_created_at_idx`(`created_at`),
+    INDEX `orders_customer_email_idx`(`customer_email`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `order_items` (
+    `id` VARCHAR(191) NOT NULL,
+    `order_id` VARCHAR(191) NOT NULL,
+    `product_id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(200) NOT NULL,
+    `sku` VARCHAR(50) NULL,
+    `price` DECIMAL(10, 2) NOT NULL,
+    `quantity` INTEGER NOT NULL,
+
+    INDEX `order_items_order_id_idx`(`order_id`),
+    INDEX `order_items_product_id_idx`(`product_id`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `inventory_history` (
+    `id` VARCHAR(191) NOT NULL,
+    `product_id` VARCHAR(191) NOT NULL,
+    `product_name` VARCHAR(200) NOT NULL,
+    `sku` VARCHAR(50) NULL,
+    `change_type` ENUM('restock', 'deduction', 'adjustment', 'correction') NOT NULL,
+    `quantity_before` INTEGER NOT NULL,
+    `quantity_after` INTEGER NOT NULL,
+    `delta` INTEGER NOT NULL,
+    `note` TEXT NULL,
+    `changed_by` VARCHAR(100) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `inventory_history_product_id_idx`(`product_id`),
+    INDEX `inventory_history_created_at_idx`(`created_at`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `admin_activity` (
+    `id` VARCHAR(191) NOT NULL,
+    `admin_sub` VARCHAR(100) NOT NULL,
+    `action` VARCHAR(100) NOT NULL,
+    `resource` VARCHAR(100) NULL,
+    `resource_id` VARCHAR(100) NULL,
+    `metadata` JSON NULL,
+    `ip_address` VARCHAR(45) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    INDEX `admin_activity_admin_sub_idx`(`admin_sub`),
+    INDEX `admin_activity_created_at_idx`(`created_at`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `inventory` ADD CONSTRAINT `inventory_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `order_items` ADD CONSTRAINT `order_items_order_id_fkey` FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `order_items` ADD CONSTRAINT `order_items_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `inventory_history` ADD CONSTRAINT `inventory_history_product_id_fkey` FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+┌─────────────────────────────────────────────────────────┐
+│  Update available 6.19.3 -> 7.8.0                       │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+

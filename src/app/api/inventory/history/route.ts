@@ -1,20 +1,19 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { listInventoryHistory } from '@/lib/db/inventory';
+import { requireSession } from '@/lib/auth/guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-const HISTORY_FILE = path.join(process.cwd(), 'data', 'inventory_changes.json');
-
 export async function GET() {
+  const auth = await requireSession();
+  if (!auth.ok) return auth.res;
+
   try {
-    const raw = await fs.readFile(HISTORY_FILE, 'utf-8');
-    const changes = JSON.parse(raw);
-    // Most recent first
-    changes.sort((a: any, b: any) => b.createdAt.localeCompare(a.createdAt));
+    const changes = await listInventoryHistory(500);
     return NextResponse.json({ changes });
-  } catch {
-    return NextResponse.json({ changes: [] });
+  } catch (err) {
+    console.error('[GET /api/inventory/history]', err);
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ShoppingBag, Search, Menu, X, ChevronRight } from 'lucide-react';
 import { useCartStore, selectItemCount, useCartHasHydrated } from '@/store/cartStore';
@@ -18,7 +18,6 @@ export default function Navbar() {
   const count = useCartStore(selectItemCount);
   const hydrated = useCartHasHydrated();
   const router = useRouter();
-  const pathname = usePathname();
   const [q, setQ] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -31,8 +30,6 @@ export default function Navbar() {
     setSearchOpen(false);
     setQ('');
   }
-
-  const isAdmin = pathname?.startsWith('/admin') || pathname?.startsWith('/inventory');
 
   return (
     <>
@@ -74,16 +71,6 @@ export default function Navbar() {
               >
                 <Search size={18} />
               </button>
-
-              {/* Admin links — subtle, desktop only */}
-              {!isAdmin && (
-                <Link
-                  href="/admin"
-                  className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-charcoal-200 px-3.5 py-2 text-xs font-semibold text-charcoal-600 transition hover:border-charcoal-900 hover:text-charcoal-900"
-                >
-                  Admin
-                </Link>
-              )}
 
               {/* Cart */}
               <Link
@@ -134,15 +121,6 @@ export default function Navbar() {
                   <ChevronRight size={14} className="text-charcoal-400" />
                 </Link>
               ))}
-              <div className="my-1 border-t border-charcoal-100" />
-              <Link
-                href="/admin"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between rounded-xl px-3 py-3 text-sm font-medium text-charcoal-500 hover:bg-charcoal-50"
-              >
-                Store admin
-                <ChevronRight size={14} className="text-charcoal-400" />
-              </Link>
             </nav>
           </div>
         )}

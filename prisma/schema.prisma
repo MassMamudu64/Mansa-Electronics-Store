@@ -1,0 +1,150 @@
+// =============================================================================
+// Mansa Electronics — Prisma schema (MySQL / Hostinger)
+// Generate client:  npx prisma generate
+// Push schema:      npx prisma db push          (no migration history; MVP)
+// Or migrate:       npx prisma migrate deploy   (uses prisma/migrations)
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Catalog ────────────────────────────────────────────────────────────────
+model Product {
+  id                 String    @id
+  slug               String    @unique
+  name               String    @db.VarChar(200)
+  category           String    @db.VarChar(50)
+  brand              String?   @db.VarChar(50)
+  sku                String?   @unique @db.VarChar(50)
+  description        String?   @db.Text
+  bullets            Json?
+  imageUrl           String?   @map("image_url") @db.VarChar(500)
+  images             Json?
+  price              Decimal   @db.Decimal(10, 2)
+  compareAtPrice     Decimal?  @map("compare_at_price") @db.Decimal(10, 2)
+  currency           String    @default("USD") @db.VarChar(3)
+  lowStockThreshold  Int       @default(3) @map("low_stock_threshold")
+  isBestSeller       Boolean   @default(false) @map("is_best_seller")
+  isActive           Boolean   @default(true) @map("is_active")
+  tags               Json?
+  compatibility      Json?
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  archivedAt         DateTime? @map("archived_at")
+
+  inventory          Inventory?
+  orderItems         OrderItem[]
+  inventoryHistory   InventoryHistory[]
+
+  @@index([category])
+  @@index([isActive])
+  @@index([archivedAt])
+  @@map("products")
+}
+
+// ─── Stock (single source of truth — separated from Product per the brief) ──
+model Inventory {
+  id        String   @id @default(cuid())
+  productId String   @unique @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stock     Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("inventory")
+}
+
+// ─── Orders + line items ────────────────────────────────────────────────────
+model Order {
+  id              String      @id
+  shortCode       String      @unique @map("short_code")
+  customerName    String      @map("customer_name") @db.VarChar(100)
+  customerEmail   String      @map("customer_email") @db.VarChar(254)
+  customerPhone   String      @map("customer_phone") @db.VarChar(30)
+  customerAddress String      @map("customer_address") @db.VarChar(500)
+  customerNotes   String?     @map("customer_notes") @db.Text
+  subtotal        Decimal     @db.Decimal(10, 2)
+  bundleDiscount  Decimal     @default(0) @map("bundle_discount") @db.Decimal(10, 2)
+  delivery        Decimal     @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(pending)
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  items           OrderItem[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([customerEmail])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String  @map("order_id")
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  name      String  @db.VarChar(200)
+  sku       String? @db.VarChar(50)
+  price     Decimal @db.Decimal(10, 2)
+  quantity  Int
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// ─── Audit logs ─────────────────────────────────────────────────────────────
+model InventoryHistory {
+  id             String              @id @default(cuid())
+  productId      String              @map("product_id")
+  product        Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productName    String              @map("product_name") @db.VarChar(200)
+  sku            String?             @db.VarChar(50)
+  changeType     InventoryChangeType @map("change_type")
+  quantityBefore Int                 @map("quantity_before")
+  quantityAfter  Int                 @map("quantity_after")
+  delta          Int
+  note           String?             @db.Text
+  changedBy      String?             @map("changed_by") @db.VarChar(100)
+  createdAt      DateTime            @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("inventory_history")
+}
+
+enum InventoryChangeType {
+  restock
+  deduction
+  adjustment
+  correction
+}
+
+model AdminActivity {
+  id         String   @id @default(cuid())
+  adminSub   String   @map("admin_sub") @db.VarChar(100)
+  action     String   @db.VarChar(100)
+  resource   String?  @db.VarChar(100)
+  resourceId String?  @map("resource_id") @db.VarChar(100)
+  metadata   Json?
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([adminSub])
+  @@index([createdAt])
+  @@map("admin_activity")
+}

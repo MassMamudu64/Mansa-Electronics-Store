@@ -22,7 +22,6 @@ const LINKS = {
     { label: 'About Mansa', href: '/#about' },
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
-    { label: 'Store Admin', href: '/admin' },
   ],
 };
 

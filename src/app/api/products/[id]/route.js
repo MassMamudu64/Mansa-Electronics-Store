@@ -1,36 +1,96 @@
 import { NextResponse } from 'next/server';
-import { getProductById, saveProduct } from '@/lib/serverDb';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { getProductById, updateProduct, archiveProduct } from '@/lib/db/products';
+import { requireSession, requireSameOrigin } from '@/lib/auth/guard';
+import { UpdateProductSchema } from '@/lib/validation/schemas';
+import { logAdminActivity } from '@/lib/db/adminActivity';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
+// GET /api/products/:id — public
 export async function GET(_req, { params }) {
-  const product = await getProductById(params.id);
-  if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json({ product });
+  try {
+    const product = await getProductById(params.id);
+    if (!product || product.archivedAt || product.is_active === false) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    return NextResponse.json({ product });
+  } catch (err) {
+    console.error('[GET /api/products/:id]', err);
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+  }
 }
 
+// PATCH /api/products/:id — admin only
 export async function PATCH(req, { params }) {
-  let patch;
-  try { patch = await req.json(); } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  const csrf = requireSameOrigin(req);
+  if (csrf) return csrf;
+
+  const auth = await requireSession();
+  if (!auth.ok) return auth.res;
+
+  let raw;
+  try {
+    raw = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
 
-  const existing = await getProductById(params.id);
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  const parsed = UpdateProductSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  }
 
-  const updated = { ...existing, ...patch, id: params.id, updatedAt: new Date().toISOString() };
-  await saveProduct(updated);
-  return NextResponse.json({ product: updated });
+  try {
+    const product = await updateProduct(params.id, parsed.data);
+
+    await logAdminActivity({
+      adminSub: auth.session.sub,
+      action: 'product.update',
+      resource: 'product',
+      resourceId: params.id,
+      metadata: { fields: Object.keys(parsed.data) },
+      req,
+    });
+
+    return NextResponse.json({ product });
+  } catch (err) {
+    if (err?.code === 'P2025') {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    if (err?.code === 'P2002') {
+      return NextResponse.json({ error: 'Slug or SKU already exists' }, { status: 409 });
+    }
+    console.error('[PATCH /api/products/:id]', err);
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+  }
 }
 
-export async function DELETE(_req, { params }) {
-  // Soft-delete by archiving
-  const existing = await getProductById(params.id);
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+// DELETE /api/products/:id — soft archive, admin only
+export async function DELETE(req, { params }) {
+  const csrf = requireSameOrigin(req);
+  if (csrf) return csrf;
 
-  const archived = { ...existing, archivedAt: new Date().toISOString(), is_active: false };
-  await saveProduct(archived);
-  return NextResponse.json({ ok: true });
+  const auth = await requireSession();
+  if (!auth.ok) return auth.res;
+
+  try {
+    await archiveProduct(params.id);
+
+    await logAdminActivity({
+      adminSub: auth.session.sub,
+      action: 'product.archive',
+      resource: 'product',
+      resourceId: params.id,
+      req,
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    if (err?.code === 'P2025') {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    console.error('[DELETE /api/products/:id]', err);
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+  }
 }

@@ -58,7 +58,9 @@
     "condition": "A",
     "price": 949.07,
     "quantity": 4,
-    "image": "/placeholder.svg"
+    "image": "/placeholder.svg",
+    "archivedAt": "2026-05-04T04:15:02.046Z",
+    "is_active": false
   },
   {
     "id": "p_005",
@@ -68,7 +70,9 @@
     "condition": "A",
     "price": 1149,
     "quantity": 1,
-    "image": "/placeholder.svg"
+    "image": "/placeholder.svg",
+    "archivedAt": "2026-05-04T04:15:04.509Z",
+    "is_active": false
   },
   {
     "id": "p_006",
@@ -78,7 +82,9 @@
     "condition": "C",
     "price": 399,
     "quantity": 6,
-    "image": "/placeholder.svg"
+    "image": "/placeholder.svg",
+    "archivedAt": "2026-05-04T04:15:07.397Z",
+    "is_active": false
   },
   {
     "id": "p_007",

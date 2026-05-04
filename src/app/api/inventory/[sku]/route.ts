@@ -1,46 +1,46 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { listProducts } from '@/lib/serverDb';
+import { getInventoryBySku } from '@/lib/db/inventory';
+import { getSession } from '@/lib/auth/guard';
+import { timingSafeEqual } from '@/lib/auth/csrf';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-function checkApiKey(req: NextRequest): boolean {
-  const key = process.env.INVENTORY_API_KEY;
-  if (!key) return true;
-  const authHeader = req.headers.get('x-api-key') ?? req.headers.get('authorization');
-  return authHeader === key || authHeader === `Bearer ${key}`;
+/**
+ * Public read API. Authorized via EITHER:
+ *   - x-api-key / Authorization: Bearer header matching INVENTORY_API_KEY, OR
+ *   - a valid admin session cookie.
+ * Fail-closed: if no API key is configured, only session-bearing requests pass.
+ */
+async function authorize(req: NextRequest): Promise<boolean> {
+  const apiKey = process.env.INVENTORY_API_KEY;
+  if (apiKey && apiKey.length >= 16) {
+    const headerKey = req.headers.get('x-api-key');
+    if (headerKey && timingSafeEqual(headerKey, apiKey)) return true;
+    const auth = req.headers.get('authorization');
+    if (auth && timingSafeEqual(auth, `Bearer ${apiKey}`)) return true;
+  }
+  const session = await getSession();
+  return Boolean(session);
 }
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { sku: string } },
 ) {
-  if (!checkApiKey(req)) {
+  if (!(await authorize(req))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { sku } = params;
-  const products = await listProducts();
+  const sku = (params.sku ?? '').slice(0, 64);
+  if (!sku) return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
 
-  const product = products.find(
-    (p) => p.sku === sku || p.id === sku || p.slug === sku,
-  );
-
-  if (!product) {
-    return NextResponse.json({ error: `No inventory found for SKU: ${sku}` }, { status: 404 });
+  try {
+    const item = await getInventoryBySku(sku);
+    if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    return NextResponse.json(item);
+  } catch (err) {
+    console.error('[GET /api/inventory/:sku]', err);
+    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
   }
-
-  const stockQty = product.stock ?? 0;
-  const threshold = product.lowStockThreshold ?? 3;
-
-  return NextResponse.json({
-    sku: product.sku ?? product.id,
-    product_id: product.id,
-    product_name: product.name,
-    stock_quantity: stockQty,
-    low_stock_threshold: threshold,
-    availability_status:
-      stockQty <= 0 ? 'out_of_stock' : stockQty <= threshold ? 'low_stock' : 'in_stock',
-    last_updated: product.updatedAt ?? product.updated_at ?? new Date().toISOString(),
-  });
 }
