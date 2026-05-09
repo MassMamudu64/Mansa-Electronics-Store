@@ -29,16 +29,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// ─── DEPRECATED — Hostinger MySQL datasource ────────────────────────────────
-// datasource db {
-//   provider = "mysql"
-//   url      = env("DATABASE_URL")
-// }
-
-// ─── ACTIVE — Supabase PostgreSQL datasource ────────────────────────────────
-// `url` is the pooled (PgBouncer, port 6543) connection used at runtime.
-// `directUrl` is the direct (port 5432) connection used by `prisma migrate`
-// and `prisma db push`, since DDL cannot run through transaction-mode pooling.
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
