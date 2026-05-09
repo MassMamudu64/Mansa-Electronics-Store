@@ -1,17 +1,48 @@
 // =============================================================================
-// Mansa Electronics — Prisma schema (MySQL / Hostinger)
-// Generate client:  npx prisma generate
-// Push schema:      npx prisma db push          (no migration history; MVP)
-// Or migrate:       npx prisma migrate deploy   (uses prisma/migrations)
+// Mansa Electronics — Prisma schema (Supabase PostgreSQL)
+//
+// MIGRATION NOTE:
+// Hostinger MySQL configuration preserved below as comments (DEPRECATED).
+// Supabase PostgreSQL configuration is now active.
+//
+// Field types in the models below are portable across MySQL and PostgreSQL —
+// `@db.VarChar(N)`, `@db.Text`, and `@db.Decimal(p,s)` are valid on both
+// providers, and `Json` maps to `JSONB` on PostgreSQL by default (which is
+// what we want — indexable, binary-encoded). Enums become real PostgreSQL
+// enum types under the hood. No model-level rewrites were required.
+//
+// Workflow:
+//   Generate client:  npx prisma generate
+//   Push schema:      npx prisma db push          (no migration history; MVP)
+//   Or migrate:       npx prisma migrate dev      (creates a fresh PG migration)
+//
+// TODO (manual): the legacy MySQL migration in prisma/migrations/20260503000000_init
+// MUST NOT be run against PostgreSQL — its SQL uses backticks and MySQL-only
+// syntax. Either:
+//   (a) delete the prisma/migrations folder and run `prisma migrate dev --name init_postgres`
+//       against the Supabase database to generate a fresh PG migration, OR
+//   (b) run `prisma db push` against Supabase to sync the schema without
+//       a migration history (acceptable for MVP, recommended for the cutover).
 // =============================================================================
 
 generator client {
   provider = "prisma-client-js"
 }
 
+// ─── DEPRECATED — Hostinger MySQL datasource ────────────────────────────────
+// datasource db {
+//   provider = "mysql"
+//   url      = env("DATABASE_URL")
+// }
+
+// ─── ACTIVE — Supabase PostgreSQL datasource ────────────────────────────────
+// `url` is the pooled (PgBouncer, port 6543) connection used at runtime.
+// `directUrl` is the direct (port 5432) connection used by `prisma migrate`
+// and `prisma db push`, since DDL cannot run through transaction-mode pooling.
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ─── Catalog ────────────────────────────────────────────────────────────────

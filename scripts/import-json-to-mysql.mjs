@@ -1,6 +1,16 @@
 /**
+ * MIGRATION NOTE:
+ * Originally written for Hostinger MySQL — kept verbatim. The script talks
+ * to the database exclusively through the Prisma client, so it is provider-
+ * agnostic and runs unchanged against Supabase PostgreSQL once schema.prisma
+ * has `provider = "postgresql"` and DATABASE_URL points at Supabase.
+ *
+ * The filename ("import-json-to-mysql") is preserved to avoid breaking the
+ * `db:import` script reference in package.json. It is no longer accurate;
+ * treat it as "import-json-to-prisma".
+ *
  * One-shot importer: copies data/products.json + data/orders.json +
- * data/inventory_changes.json into the new MySQL schema via Prisma.
+ * data/inventory_changes.json into the database via Prisma.
  *
  * Run AFTER `npx prisma db push` (or `prisma migrate deploy`):
  *   node scripts/import-json-to-mysql.mjs

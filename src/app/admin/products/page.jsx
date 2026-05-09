@@ -225,6 +225,7 @@ export default function AdminProductsPage() {
                   <th className="table-header px-5 py-3">Stock</th>
                   <th className="table-header px-5 py-3">Status</th>
                   <th className="table-header px-5 py-3" />
+                  <th className="table-header px-5 py-3">106</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,4 +1,15 @@
 /**
+ * MIGRATION NOTE:
+ * Hostinger MySQL implementation preserved below as comments where the
+ * behavior diverges. Supabase PostgreSQL implementation now active.
+ *
+ * Only one query needed adjustment for the cutover: the `contains` filter
+ * used by product search. MySQL's default collation (utf8mb4_unicode_ci)
+ * makes `LIKE` case-insensitive by default, so the original Prisma calls
+ * relied on that implicit behavior. PostgreSQL's `LIKE` is case-sensitive,
+ * so we now pass `mode: 'insensitive'` explicitly — Prisma rewrites this to
+ * `ILIKE` on PG. All other queries are provider-agnostic via Prisma.
+ *
  * Product queries. Each call returns the JSON shape the existing client
  * expects (via serializeProduct). Inventory is always joined since the
  * storefront and admin both need stock alongside the product fields.
@@ -25,10 +36,17 @@ export async function listProducts(filters: ProductListFilters = {}) {
   if (filters.featured) where.isBestSeller = true;
   if (filters.category) where.category = filters.category;
   if (filters.q) {
+    // DEPRECATED — Hostinger MySQL (case-insensitive collation by default):
+    // where.OR = [
+    //   { name: { contains: filters.q } },
+    //   { category: { contains: filters.q } },
+    //   { brand: { contains: filters.q } },
+    // ];
+    // ACTIVE — Supabase PostgreSQL (case-sensitive LIKE; need ILIKE):
     where.OR = [
-      { name: { contains: filters.q } },
-      { category: { contains: filters.q } },
-      { brand: { contains: filters.q } },
+      { name: { contains: filters.q, mode: 'insensitive' } },
+      { category: { contains: filters.q, mode: 'insensitive' } },
+      { brand: { contains: filters.q, mode: 'insensitive' } },
     ];
   }
 
