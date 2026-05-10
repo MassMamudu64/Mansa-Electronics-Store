@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 
 let cachedTransport = null;
+//  Get or create a cached Nodemailer transport based on environment variables
 
 function getTransport() {
   if (cachedTransport) return cachedTransport;
