@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import { ShoppingBag, ChevronLeft, ShieldCheck, Truck, RotateCcw, Minus, Plus } from 'lucide-react';
-import { cartService } from '@/services/cartService';
+import { useAddToCartPopup } from '@/hooks/useAddToCartPopup';
 import { formatPrice } from '@/lib/money';
 import ProductCard from '@/components/ProductCard';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const { addAndShow } = useAddToCartPopup();
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
 
@@ -90,11 +90,7 @@ export default function ProductDetailPage() {
 
   function handleAddToCart() {
     if (oos) return;
-    cartService.addProductDirect({ ...product, stock: stockQty }, qty);
-    toast.success(`${product.name} added to cart`, {
-      description: `Qty: ${qty}`,
-      duration: 2500,
-    });
+    addAndShow({ ...product, stock: stockQty }, qty);
   }
 
   return (

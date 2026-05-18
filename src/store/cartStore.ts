@@ -6,16 +6,23 @@ import type { CartItem } from '@/types/cart';
 
 interface CartState {
   items: CartItem[];
+  // Ephemeral popup state — never persisted (see partialize below).
+  popupItem: CartItem | null;
+  isPopupOpen: boolean;
   addItem: (item: CartItem) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   removeItem: (productId: string) => void;
   clear: () => void;
+  openPopup: (item: CartItem) => void;
+  closePopup: () => void;
 }
 
 export const useCartStore = create<CartState>()(
   persist(
     (set) => ({
       items: [],
+      popupItem: null,
+      isPopupOpen: false,
 
       addItem: (item) =>
         set((state) => {
@@ -50,11 +57,15 @@ export const useCartStore = create<CartState>()(
         set((state) => ({ items: state.items.filter((i) => i.productId !== productId) })),
 
       clear: () => set({ items: [] }),
+
+      openPopup: (item) => set({ popupItem: item, isPopupOpen: true }),
+      closePopup: () => set({ isPopupOpen: false }),
     }),
     {
       name: 'mansa:cart',
       storage: createJSONStorage(() => localStorage),
       version: 1,
+      partialize: (state) => ({ items: state.items }),
     },
   ),
 );

@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { ShoppingBag } from 'lucide-react';
-import { toast } from 'sonner';
-import { cartService } from '@/services/cartService';
+import { useAddToCartPopup } from '@/hooks/useAddToCartPopup';
 import { formatPrice } from '@/lib/money';
 
 export default function ProductCard({ product }) {
+  const { addAndShow } = useAddToCartPopup();
+
   const oos = (product.stock ?? 0) <= 0;
   const lowStock = !oos && (product.stock ?? 0) <= (product.lowStockThreshold ?? 3);
   const image = product.images?.[0]?.url ?? product.image_url ?? '/placeholder.svg';
@@ -16,8 +17,7 @@ export default function ProductCard({ product }) {
 
   function handleAddToCart(e) {
     e.preventDefault();
-    cartService.addProductDirect(product, 1);
-    toast.success(`${product.name} added to cart`, { duration: 2000 });
+    addAndShow(product, 1);
   }
 
   return (
