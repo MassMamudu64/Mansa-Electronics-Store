@@ -1,19 +1,21 @@
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
-import ProductCard from '@/components/ProductCard';
+import ProductCard from '@/components/products/ProductCard';
+import ProductCardSkeleton from '@/components/products/ProductCardSkeleton';
+import ProductFilters, { EMPTY_FILTERS } from '@/components/products/ProductFilters';
+import EmptyState from '@/components/products/EmptyState';
 
 const CATEGORIES = [
-  { label: 'Smartphones',  value: 'iPhone' },
-  { label: 'Chargers',     value: 'Chargers' },
-  { label: 'Audio',        value: 'Audio' },
-  { label: 'Cases',        value: 'Cases' },
-  { label: 'Cables',       value: 'Cables' },
-  { label: 'Power Banks',  value: 'PowerBanks' },
-  { label: 'Accessories',  value: 'Accessories' },
+  { label: 'Smartphones', value: 'iPhone' },
+  { label: 'Chargers',    value: 'Chargers' },
+  { label: 'Audio',       value: 'Audio' },
+  { label: 'Cases',       value: 'Cases' },
+  { label: 'Cables',      value: 'Cables' },
+  { label: 'Power Banks', value: 'PowerBanks' },
+  { label: 'Accessories', value: 'Accessories' },
 ];
 
 const SORT_OPTIONS = [
@@ -25,20 +27,29 @@ const SORT_OPTIONS = [
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="container-site py-20 text-center text-sm text-charcoal-400">Loading shop…</div>}>
+    <Suspense fallback={<ShopFallback />}>
       <ShopContent />
     </Suspense>
+  );
+}
+
+function ShopFallback() {
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="container-site py-20 text-center text-sm text-charcoal-400">Loading shop…</div>
+    </div>
   );
 }
 
 function ShopContent() {
   const searchParams = useSearchParams();
 
-  const [category, setCategory] = useState(searchParams.get('category') ?? '');
-  const [q, setQ] = useState(searchParams.get('q') ?? '');
-  const [sort, setSort] = useState(searchParams.get('sort') ?? 'featured');
-  const [inStockOnly, setInStockOnly] = useState(false);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    ...EMPTY_FILTERS,
+    category: searchParams.get('category') ?? '',
+    q: searchParams.get('q') ?? '',
+    sort: searchParams.get('sort') ?? 'featured',
+  });
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products', 'all'],
@@ -51,27 +62,61 @@ function ShopContent() {
     staleTime: 60_000,
   });
 
+  // Derive available storage / condition options from the actual catalog
+  const { availableStorages, availableConditions } = useMemo(() => {
+    const s = new Set();
+    const c = new Set();
+    for (const p of products) {
+      if (p.storage && p.storage !== '-' && p.storage !== '') s.add(p.storage);
+      if (p.condition) c.add(p.condition);
+    }
+    return {
+      availableStorages: Array.from(s).sort(storageSort),
+      availableConditions: Array.from(c).sort(),
+    };
+  }, [products]);
+
   const filtered = useMemo(() => {
     let list = [...products];
 
-    if (category) {
-      list = list.filter(
-        (p) => (p.category ?? p.category) === category,
-      );
+    if (filters.category) {
+      list = list.filter((p) => p.category === filters.category);
     }
-    if (q.trim()) {
-      const lower = q.trim().toLowerCase();
+
+    if (filters.q.trim()) {
+      const lower = filters.q.trim().toLowerCase();
       list = list.filter(
         (p) =>
           p.name?.toLowerCase().includes(lower) ||
+          p.model?.toLowerCase().includes(lower) ||
           p.category?.toLowerCase().includes(lower) ||
           p.brand?.toLowerCase().includes(lower) ||
           p.tags?.some?.((t) => t.toLowerCase().includes(lower)),
       );
     }
-    if (inStockOnly) list = list.filter((p) => (p.stock ?? 0) > 0);
 
-    switch (sort) {
+    if (filters.storages.length > 0) {
+      list = list.filter((p) => p.storage && filters.storages.includes(p.storage));
+    }
+
+    if (filters.conditions.length > 0) {
+      list = list.filter((p) => p.condition && filters.conditions.includes(p.condition));
+    }
+
+    const min = filters.minPrice === '' ? null : Number(filters.minPrice);
+    const max = filters.maxPrice === '' ? null : Number(filters.maxPrice);
+    if (min !== null && !Number.isNaN(min)) {
+      list = list.filter((p) => (p.price ?? p.selling_price ?? 0) >= min);
+    }
+    if (max !== null && !Number.isNaN(max)) {
+      list = list.filter((p) => (p.price ?? p.selling_price ?? 0) <= max);
+    }
+
+    if (filters.inStockOnly) {
+      list = list.filter((p) => (p.stock ?? 0) > 0);
+    }
+
+    switch (filters.sort) {
       case 'newest':
         list.sort((a, b) =>
           (b.createdAt ?? b.created_at ?? '').localeCompare(a.createdAt ?? a.created_at ?? ''),
@@ -92,168 +137,85 @@ function ShopContent() {
     }
 
     return list;
-  }, [products, category, q, inStockOnly, sort]);
+  }, [products, filters]);
 
-  const hasFilters = !!category || !!q || inStockOnly || sort !== 'featured';
+  const clearFilters = () => setFilters({ ...EMPTY_FILTERS });
 
-  function clearFilters() {
-    setCategory('');
-    setQ('');
-    setInStockOnly(false);
-    setSort('featured');
-  }
-
-  const FilterPanel = () => (
-    <div className="space-y-6">
-      <div>
-        <p className="label">Category</p>
-        <div className="mt-2 space-y-0.5">
-          <button
-            onClick={() => setCategory('')}
-            className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
-              !category
-                ? 'bg-charcoal-900 font-semibold text-white'
-                : 'text-charcoal-700 hover:bg-charcoal-50'
-            }`}
-          >
-            All Products
-          </button>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => setCategory(category === cat.value ? '' : cat.value)}
-              className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
-                category === cat.value
-                  ? 'bg-charcoal-900 font-semibold text-white'
-                  : 'text-charcoal-700 hover:bg-charcoal-50'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t border-charcoal-100 pt-5">
-        <label className="flex cursor-pointer items-center gap-3">
-          <input
-            type="checkbox"
-            checked={inStockOnly}
-            onChange={(e) => setInStockOnly(e.target.checked)}
-            className="h-4 w-4 rounded border-charcoal-300 accent-charcoal-900"
-          />
-          <span className="text-sm font-medium text-charcoal-700">In stock only</span>
-        </label>
-      </div>
-
-      {hasFilters && (
-        <button
-          onClick={clearFilters}
-          className="flex items-center gap-1.5 text-xs text-charcoal-500 hover:text-charcoal-900"
-        >
-          <X size={13} />
-          Clear all filters
-        </button>
-      )}
-    </div>
-  );
+  const activeCategoryLabel =
+    CATEGORIES.find((c) => c.value === filters.category)?.label ?? null;
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="border-b border-charcoal-100 bg-charcoal-50 py-10">
-        <div className="container-site">
-          <h1 className="text-3xl font-black tracking-tight text-charcoal-900 md:text-4xl">
-            {category
-              ? CATEGORIES.find((c) => c.value === category)?.label ?? category
-              : 'All Products'}
+      {/* ─── Hero header ─── */}
+      <section className="relative overflow-hidden border-b border-charcoal-100 bg-gradient-to-b from-charcoal-50 via-white to-white">
+        {/* Subtle radial accent */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 left-1/2 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-charcoal-200/40 blur-3xl"
+        />
+        <div className="container-site relative py-12 sm:py-16">
+          <p className="eyebrow">Shop</p>
+          <h1 className="mt-2 text-4xl font-black tracking-tight text-charcoal-900 sm:text-5xl">
+            {activeCategoryLabel ?? 'All Products'}
           </h1>
-          <p className="mt-1 text-sm text-charcoal-500">
-            {isLoading
-              ? 'Loading…'
-              : `${filtered.length} product${filtered.length !== 1 ? 's' : ''}`}
+          <p className="mt-3 max-w-xl text-sm text-charcoal-500 sm:text-base">
+            Premium electronics, fully tested and ready to ship. Every device is graded, cleaned and
+            backed by our guarantee.
           </p>
         </div>
-      </div>
+      </section>
 
-      <div className="container-site py-8">
-        {/* Toolbar */}
-        <div className="mb-6 flex flex-wrap items-center gap-3">
-          <div className="relative min-w-0 flex-1 max-w-xs">
-            <Search
-              size={14}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-charcoal-400"
-            />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search products…"
-              className="input-sm pl-9"
-            />
-          </div>
+      {/* ─── Filters + Grid ─── */}
+      <div className="container-site">
+        <ProductFilters
+          categories={CATEGORIES}
+          storages={availableStorages}
+          conditions={availableConditions}
+          sortOptions={SORT_OPTIONS}
+          filters={filters}
+          onChange={setFilters}
+          onClear={clearFilters}
+          resultCount={filtered.length}
+          totalCount={products.length}
+        />
 
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="input-sm w-auto cursor-pointer"
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-
-          <button
-            onClick={() => setMobileFiltersOpen((o) => !o)}
-            className="btn-secondary-sm flex items-center gap-1.5 lg:hidden"
-          >
-            <SlidersHorizontal size={14} />
-            Filters
-          </button>
-        </div>
-
-        {/* Mobile filter panel */}
-        {mobileFiltersOpen && (
-          <div className="mb-6 rounded-2xl border border-charcoal-100 bg-white p-5 shadow-card animate-fade-in lg:hidden">
-            <FilterPanel />
-          </div>
-        )}
-
-        <div className="flex gap-8">
-          {/* Desktop sidebar */}
-          <aside className="hidden w-48 flex-shrink-0 lg:block">
-            <FilterPanel />
-          </aside>
-
-          {/* Product grid */}
-          <div className="flex-1 min-w-0">
-            {isLoading ? (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className="h-72 animate-pulse rounded-2xl bg-charcoal-100" />
+        <div className="py-8 sm:py-10">
+          {isLoading ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <ProductCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <EmptyState onClear={clearFilters} />
+          ) : (
+            <>
+              <p className="mb-4 text-xs font-medium text-charcoal-500 sm:hidden">
+                {filtered.length} product{filtered.length !== 1 ? 's' : ''}
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+                {filtered.map((product, i) => (
+                  <ProductCard key={product.id} product={product} index={i} />
                 ))}
               </div>
-            ) : filtered.length === 0 ? (
-              <div className="py-24 text-center">
-                <p className="text-3xl font-black text-charcoal-200">No results</p>
-                <p className="mt-2 text-sm text-charcoal-500">
-                  Try different filters or a broader search.
-                </p>
-                <button onClick={clearFilters} className="mt-5 btn-secondary-sm">
-                  Clear filters
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
-                {filtered.map((p) => (
-                  <ProductCard key={p.id} product={p} />
-                ))}
-              </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+/** Sort storage strings like "64GB", "128GB", "1TB" by numeric capacity. */
+function storageSort(a, b) {
+  const toBytes = (s) => {
+    const m = String(s).match(/(\d+(?:\.\d+)?)\s*(GB|TB|MB)?/i);
+    if (!m) return 0;
+    const n = parseFloat(m[1]);
+    const unit = (m[2] ?? 'GB').toUpperCase();
+    if (unit === 'TB') return n * 1024;
+    if (unit === 'MB') return n / 1024;
+    return n;
+  };
+  return toBytes(a) - toBytes(b);
 }

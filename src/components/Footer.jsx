@@ -13,15 +13,15 @@ const LINKS = {
     { label: 'Power Banks', href: '/shop?category=PowerBanks' },
   ],
   Support: [
-    { label: 'FAQ', href: '/#faq' },
-    { label: 'Warranty', href: '/#warranty' },
-    { label: 'Returns & Shipping', href: '/#returns' },
-    { label: 'Contact Us', href: '/#contact' },
+    { label: 'FAQ', href: '/support/faq' },
+    { label: 'Warranty', href: '/support/warranty' },
+    { label: 'Returns & Shipping', href: '/support/returns-shipping' },
+    { label: 'Contact Us', href: '/support/contact' },
   ],
   Company: [
-    { label: 'About Mansa', href: '/#about' },
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
+    { label: 'About Mansa', href: '/company/about' },
+    { label: 'Privacy Policy', href: '/company/privacy-policy' },
+    { label: 'Terms of Service', href: '/company/terms' },
   ],
 };
 
@@ -86,8 +86,8 @@ export default function Footer() {
           <div className="flex flex-col items-center justify-between gap-3 text-xs text-charcoal-600 md:flex-row">
             <span>© {new Date().getFullYear()} Mansa Electronics. All rights reserved.</span>
             <div className="flex items-center gap-4">
-              <Link href="/terms" className="hover:text-charcoal-300 transition">Terms</Link>
-              <Link href="/privacy" className="hover:text-charcoal-300 transition">Privacy</Link>
+              <Link href="/company/terms" className="hover:text-charcoal-300 transition">Terms</Link>
+              <Link href="/company/privacy-policy" className="hover:text-charcoal-300 transition">Privacy</Link>
             </div>
           </div>
         </div>
