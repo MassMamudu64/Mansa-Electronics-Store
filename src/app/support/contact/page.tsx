@@ -55,26 +55,50 @@ export default function ContactPage() {
               }
               subtitle="Replies within a few hours on business days"
             />
-            <ContactCard
-              icon={<MessageCircle size={18} />}
-              title="WhatsApp"
-              body={
-                <span className="text-charcoal-900 font-medium">+1 (555) 123-4567</span>
-              }
-              subtitle="Chat with us in real time during business hours"
-            />
+           <a
+  href="https://wa.me/16512000234"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="block"
+>
+  <ContactCard
+    icon={<MessageCircle size={18} />}
+    title="WhatsApp"
+    body={
+      <span className="text-charcoal-900 font-medium">
+        +1 (651) 200-0234
+      </span>
+    }
+    subtitle="Chat with us in real time during business hours"
+  />
+</a>
+
             <ContactCard
               icon={<Clock size={18} />}
               title="Business hours"
-              body={<span className="text-charcoal-900 font-medium">Mon–Fri, 9am – 6pm</span>}
+              body={<span className="text-charcoal-900 font-medium">Mon–Sat, 9am – 6pm</span>}
               subtitle="Closed on public holidays"
+            />
+            {/* We have three base locations */}
+            <ContactCard
+              icon={<MapPin size={18} />}
+              title="Based in"
+              body={<span className="text-charcoal-900 font-medium">Liberia Monrovia</span>}
+              subtitle="Shipping worldwide"
             />
             <ContactCard
               icon={<MapPin size={18} />}
               title="Based in"
-              body={<span className="text-charcoal-900 font-medium">Dakar, Senegal</span>}
+              body={<span className="text-charcoal-900 font-medium">United State of America</span>}
               subtitle="Shipping worldwide"
             />
+            <ContactCard
+              icon={<MapPin size={18} />}
+              title="Based in"
+              body={<span className="text-charcoal-900 font-medium">Guinea Conakry</span>}
+              subtitle="Shipping worldwide"
+            />
+
           </aside>
         </div>
       </section>
