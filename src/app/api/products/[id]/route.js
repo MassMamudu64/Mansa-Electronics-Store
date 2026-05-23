@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getProductById, updateProduct, archiveProduct } from '@/lib/db/products';
+import {
+  getProductById,
+  getProductBySlugOrSku,
+  updateProduct,
+  archiveProduct,
+} from '@/lib/db/products';
 import { requireSession, requireSameOrigin } from '@/lib/auth/guard';
 import { UpdateProductSchema } from '@/lib/validation/schemas';
 import { logAdminActivity } from '@/lib/db/adminActivity';
@@ -7,16 +12,21 @@ import { logAdminActivity } from '@/lib/db/adminActivity';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// GET /api/products/:id — public
+// GET /api/products/:key — public. `key` may be id, slug, or sku.
 export async function GET(_req, { params }) {
+  const key = (params?.id ?? '').trim().slice(0, 100);
+  if (!key) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  }
+
   try {
-    const product = await getProductById(params.id);
+    const product = await getProductBySlugOrSku(key);
     if (!product || product.archivedAt || product.is_active === false) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
     return NextResponse.json({ product });
   } catch (err) {
-    console.error('[GET /api/products/:id]', err);
+    console.error('[GET /api/products/:key]', err);
     return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
   }
 }
