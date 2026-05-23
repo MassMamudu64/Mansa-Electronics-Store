@@ -2,6 +2,7 @@ export type DeviceType = 'iPhone' | 'Android' | 'Laptop' | 'Universal';
 
 export type Category =
   | 'iPhone'
+  | 'Samsung'
   | 'Android'
   | 'Accessories'
   | 'Cases'

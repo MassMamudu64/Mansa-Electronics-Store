@@ -7,16 +7,7 @@ import ProductCard from '@/components/products/ProductCard';
 import ProductCardSkeleton from '@/components/products/ProductCardSkeleton';
 import ProductFilters, { EMPTY_FILTERS } from '@/components/products/ProductFilters';
 import EmptyState from '@/components/products/EmptyState';
-
-const CATEGORIES = [
-  { label: 'Smartphones', value: 'iPhone' },
-  { label: 'Chargers',    value: 'Chargers' },
-  { label: 'Audio',       value: 'Audio' },
-  { label: 'Cases',       value: 'Cases' },
-  { label: 'Cables',      value: 'Cables' },
-  { label: 'Power Banks', value: 'PowerBanks' },
-  { label: 'Accessories', value: 'Accessories' },
-];
+import { CATEGORIES } from '@/config/categories';
 
 const SORT_OPTIONS = [
   { value: 'featured',   label: 'Featured' },

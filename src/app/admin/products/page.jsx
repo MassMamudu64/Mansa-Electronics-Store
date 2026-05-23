@@ -5,13 +5,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Plus, Search, Pencil, Trash2, X, Save, Loader2 } from 'lucide-react';
 import { formatPrice } from '@/lib/money';
+import { CATEGORIES, DEFAULT_CATEGORY, categoryLabel } from '@/config/categories';
 
 const EMPTY_FORM = {
-  name: '', category: 'Accessories', brand: '', price: '', compare_at_price: '',
+  name: '', category: DEFAULT_CATEGORY, brand: '', price: '', compare_at_price: '',
   stock: '0', sku: '', description: '', image_url: '', isBestSeller: false,
 };
-
-const CATEGORIES = ['iPhone', 'Chargers', 'Audio', 'Cases', 'Cables', 'PowerBanks', 'Accessories'];
 
 const STATUS_BADGE = {
   in_stock: 'badge-green',
@@ -83,7 +82,7 @@ export default function AdminProductsPage() {
   function openEdit(product) {
     setForm({
       name: product.name ?? '',
-      category: product.category ?? 'Accessories',
+      category: product.category ?? DEFAULT_CATEGORY,
       brand: product.brand ?? '',
       price: String(product.price ?? ''),
       compare_at_price: String(product.compare_at_price ?? ''),
@@ -148,7 +147,9 @@ export default function AdminProductsPage() {
                 <div>
                   <label className="label">Category</label>
                   <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} className="input">
-                    {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                    {CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -243,7 +244,7 @@ export default function AdminProductsPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="table-cell px-5 text-charcoal-500">{p.category}</td>
+                      <td className="table-cell px-5 text-charcoal-500">{categoryLabel(p.category)}</td>
                       <td className="table-cell px-5 font-semibold">{formatPrice(p.price ?? 0, 'USD')}</td>
                       <td className="table-cell px-5">{p.stock ?? 0}</td>
                       <td className="table-cell px-5">
