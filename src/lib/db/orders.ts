@@ -10,6 +10,7 @@ import 'server-only';
 import { prisma } from '@/lib/prisma';
 import { serializeOrder } from './serialize';
 import { newId, shortCode } from '@/lib/id';
+import { deliveryFor } from '@/lib/shipping';
 
 export interface CustomerInput {
   name: string;
@@ -139,7 +140,7 @@ export async function createOrderTransactional(input: {
 
     // 4. Compute totals.
     const subtotal = lines.reduce((s, l) => s + l.price * l.quantity, 0);
-    const delivery = subtotal >= 50 ? 0 : 5;
+    const delivery = deliveryFor(subtotal);
     const total = subtotal + delivery;
 
     // 5. Create order + line items in one nested write.

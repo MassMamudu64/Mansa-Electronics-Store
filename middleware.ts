@@ -13,6 +13,8 @@ export const config = {
     '/api/orders/:path*',
     '/api/inventory',
     '/api/inventory/:path*',
+    '/api/pricing',
+    '/api/pricing/:path*',
   ],
 };
 
@@ -53,6 +55,16 @@ function needsSessionForApi(path: string, method: string): boolean {
   ) {
     return false;
   }
+
+  // Pricing engine:
+  //   - /api/pricing/quote is fully public (POST).
+  //   - /api/pricing/sync uses dual-auth (session OR WESELL_INGEST_KEY); the
+  //     route handler owns the decision so middleware lets the POST through.
+  //   - Everything else under /api/pricing/* exposes wholesale cost data —
+  //     admin only.
+  if (path === '/api/pricing/quote' && method === 'POST') return false;
+  if (path === '/api/pricing/sync' && method === 'POST') return false;
+  if (path === '/api/pricing' || path.startsWith('/api/pricing/')) return true;
 
   // Every state-changing request to a protected resource needs a session.
   if (WRITE_METHODS.has(method)) return true;

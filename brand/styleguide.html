@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mansa Electronics — Brand & UI Style Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  /* ===== EXTRACTED FROM LOGO (pixel-sampled from brand/mansa-logo.png) ===== */
+  --brown-900:#200A04; --brown-800:#351608; --brown-700:#3B190A; --brown-600:#4A2310;
+  --gold-700:#B27D21; --gold-600:#BB842E; --gold-500:#C8923A; --gold-400:#D0A24D;
+  --gold-grad:linear-gradient(180deg,#EFCD80 0%,#C08A33 55%,#B27D21 100%);
+  --paper:#FFFFFF; --paper-warm:#FAF7F2; --sand-100:#F2EBE1; --sand-300:#D8CCBC;
+  --ink-900:#1A1512; --ink-700:#3D3833; --ink-500:#6B6258;
+  --success:#3E7C5A; --warning:#C2862A; --error:#A33A2A; --info:#3A5A7A;
+  /* system */
+  --radius-sm:8px; --radius-md:14px; --radius-lg:22px; --pill:999px;
+  --shadow-sm:0 1px 2px rgba(46,26,12,.06),0 1px 3px rgba(46,26,12,.04);
+  --shadow-md:0 6px 18px rgba(46,26,12,.08);
+  --shadow-lg:0 18px 48px rgba(46,26,12,.12);
+  --shadow-gold:0 8px 24px rgba(194,134,42,.28);
+  --hair:1px solid var(--sand-300);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--ink-700);background:var(--paper-warm);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.serif{font-family:'Cormorant Garamond',Georgia,serif}
+.eyebrow{font:600 13px/1 'Inter';letter-spacing:.18em;text-transform:uppercase;color:var(--gold-700)}
+section{padding:72px 0;border-bottom:var(--hair)}
+h2.sec{font:600 40px/1.1 'Cormorant Garamond',serif;color:var(--brown-800);margin:10px 0 6px;letter-spacing:-.5px}
+.sec-sub{color:var(--ink-500);max-width:640px;margin-bottom:36px}
+.grid{display:grid;gap:20px}
+
+/* ===== TOP BAR ===== */
+.topbar{background:var(--brown-900);color:#fff;font-size:13px;text-align:center;padding:9px}
+.topbar b{color:var(--gold-400)}
+
+/* ===== LOGO RECREATION ===== */
+.logo-stage{background:var(--paper);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:54px;text-align:center}
+.logo-img{max-width:420px;width:100%;display:none}
+.logo-css .word{font:700 88px/0.9 'Cormorant Garamond',serif;color:var(--brown-800);letter-spacing:6px}
+.logo-css .sub{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:8px}
+.logo-css .sub .line{height:2px;width:52px;background:var(--gold-600)}
+.logo-css .sub .lbl{font:600 26px/1 'Inter';letter-spacing:.42em;color:var(--gold-600);padding-left:.42em}
+.logo-css .tag{margin-top:14px;font:600 12px/1 'Inter';letter-spacing:.22em;color:var(--ink-900)}
+.logo-css .tag span{color:var(--gold-600);margin:0 6px}
+
+/* ===== PALETTE ===== */
+.swatches{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.sw{border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);background:var(--paper);cursor:pointer;transition:.2s}
+.sw:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.sw .chip{height:96px}
+.sw .meta{padding:12px 14px}
+.sw .nm{font:600 13px/1.3 'Inter';color:var(--brown-800)}
+.sw .hx{font:500 12px/1.4 'Inter';color:var(--ink-500);text-transform:uppercase}
+
+/* ===== TYPE SCALE ===== */
+.type-row{display:flex;align-items:baseline;gap:24px;padding:14px 0;border-bottom:1px dashed var(--sand-300)}
+.type-row .tag-name{width:120px;flex:none;font:600 12px/1 'Inter';letter-spacing:.1em;text-transform:uppercase;color:var(--gold-700)}
+.type-row .specs{margin-left:auto;font:500 12px 'Inter';color:var(--ink-500);white-space:nowrap}
+
+/* ===== BUTTONS ===== */
+.btnrow{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:14px}
+.btn{font:600 15px/1 'Inter';letter-spacing:.02em;border:0;border-radius:var(--pill);padding:14px 28px;cursor:pointer;transition:.2s ease}
+.btn-primary{background:var(--brown-800);color:#fff}
+.btn-primary:hover{background:var(--brown-700);box-shadow:var(--shadow-gold);transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0);box-shadow:none}
+.btn-gold{background:var(--gold-grad);color:#2E1A0C;font-weight:700}
+.btn-gold:hover{filter:brightness(1.05);box-shadow:var(--shadow-gold)}
+.btn-ghost{background:transparent;color:var(--brown-800);border:1.5px solid var(--brown-800);padding:12.5px 26px}
+.btn-ghost:hover{background:var(--brown-800);color:#fff}
+.btn:disabled{background:var(--sand-300);color:var(--ink-500);cursor:not-allowed;box-shadow:none;transform:none;border-color:transparent}
+
+/* ===== BADGES ===== */
+.badge{display:inline-flex;align-items:center;gap:6px;font:600 12px/1 'Inter';padding:6px 12px;border-radius:var(--pill)}
+.b-sale{background:var(--gold-grad);color:#2E1A0C}
+.b-new{background:var(--brown-800);color:#fff}
+.b-stock{background:var(--sand-100);color:var(--ink-700)}
+.b-stock .dot{width:7px;height:7px;border-radius:50%;background:var(--success)}
+.b-low{background:#FBF1DD;color:var(--gold-700)}
+.b-out{background:var(--sand-100);color:var(--ink-500)}
+.b-best{background:var(--paper);color:var(--gold-700);border:1.5px solid var(--gold-500)}
+
+/* ===== PRODUCT CARDS ===== */
+.cards{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.card{background:var(--paper);border:var(--hair);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;transition:.25s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.card .imgwrap{position:relative;background:var(--paper-warm);aspect-ratio:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card .imgwrap-emoji{font-size:72px;transition:.25s}
+.card:hover .imgwrap-emoji{transform:scale(1.06)}
+.card .topbadges{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between}
+.card .heart{width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.card .body{padding:16px}
+.card .eb{font:600 11px/1 'Inter';letter-spacing:.12em;text-transform:uppercase;color:var(--ink-500)}
+.card .nm{font:600 17px/1.3 'Inter';color:var(--brown-800);margin:6px 0}
+.card .stars{color:var(--gold-500);font-size:13px;margin-bottom:8px}
+.card .stars span{color:var(--ink-500)}
+.card .price{font:700 19px 'Inter';color:var(--brown-900);font-variant-numeric:tabular-nums}
+.card .price s{color:var(--ink-500);font-weight:500;font-size:14px;margin-left:8px}
+.card .cta{margin-top:14px;width:100%;opacity:.85;transition:.25s}
+.card:hover .cta{opacity:1}
+
+/* ===== FORMS ===== */
+.field-lbl{font:600 12px/1 'Inter';letter-spacing:.1em;text-transform:uppercase;color:var(--ink-700);margin-bottom:8px;display:block}
+.field{width:100%;background:var(--paper);border:1.5px solid var(--sand-300);border-radius:var(--radius-sm);padding:14px 16px;font:400 16px 'Inter';color:var(--ink-700)}
+.field:focus{border-color:var(--gold-600);box-shadow:0 0 0 3px rgba(194,134,42,.18);outline:0}
+.field.err{border-color:var(--error)}
+.help{font:500 13px 'Inter';color:var(--ink-500);margin-top:6px}
+.help.err{color:var(--error)}
+
+/* ===== BANNERS ===== */
+.banner{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:var(--radius-md);font-size:14px;margin-bottom:14px}
+.ban-promo{background:var(--brown-900);color:#fff}
+.ban-promo .dot{width:8px;height:8px;border-radius:50%;background:var(--gold-400)}
+.ban-success{background:var(--sand-100);border-left:3px solid var(--success);color:var(--ink-700)}
+.ban-error{background:#FBEEEB;border-left:3px solid var(--error);color:var(--ink-700)}
+.ban-info{background:var(--paper-warm);border-left:3px solid var(--info);color:var(--ink-700)}
+.banner .x{margin-left:auto;cursor:pointer;opacity:.6}
+
+/* ===== WIREFRAME ===== */
+pre.wire{background:var(--brown-900);color:#EAD9C2;font:12px/1.5 'SFMono-Regular',Consolas,monospace;padding:24px;border-radius:var(--radius-md);overflow-x:auto}
+pre.wire b{color:var(--gold-400)}
+
+/* ===== USAGE DO/DONT ===== */
+.dd{grid-template-columns:1fr 1fr}
+.dd .col{background:var(--paper);border-radius:var(--radius-md);padding:22px;box-shadow:var(--shadow-sm)}
+.dd .col h4{font:600 14px 'Inter';margin-bottom:12px}
+.dd .yes h4{color:var(--success)} .dd .no h4{color:var(--error)}
+.dd li{list-style:none;padding:6px 0;font-size:14px}
+
+footer{background:var(--brown-900);color:#CDBBA6;padding:40px 0;text-align:center;font-size:13px}
+footer b{color:var(--gold-400)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--brown-800);color:#fff;padding:12px 22px;border-radius:var(--pill);font-size:14px;box-shadow:var(--shadow-lg);transition:.3s;opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+@media(max-width:680px){.logo-css .word{font-size:54px}.logo-css .sub .lbl{font-size:18px}.dd{grid-template-columns:1fr}h2.sec{font-size:30px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">Free delivery in Accra on orders over <b>GHS 1,000</b> · Technology · Quality · Trust</div>
+
+<!-- ===== HERO / LOGO ===== -->
+<section style="background:var(--paper-warm)">
+  <div class="wrap">
+    <div class="eyebrow">Brand &amp; UI System</div>
+    <h2 class="sec" style="font-size:52px">Mansa Electronics — Style Guide</h2>
+    <p class="sec-sub">Espresso &amp; gold identity extracted directly from the logo. Premium, minimal, global, luxury-tech. Click any swatch to copy its hex.</p>
+    <div class="logo-stage">
+      <img class="logo-img" id="realLogo" src="mansa-logo.png" alt="Mansa Electronics" />
+      <div class="logo-css" id="cssLogo">
+        <div class="word">MANSA</div>
+        <div class="sub"><span class="line"></span><span class="lbl">ELECTRONICS</span><span class="line"></span></div>
+        <div class="tag">TECHNOLOGY <span>|</span> QUALITY <span>|</span> TRUST</div>
+      </div>
+      <p style="margin-top:22px;font-size:12px;color:var(--ink-500)">Drop your official PNG at <b>brand/mansa-logo.png</b> to replace this CSS recreation automatically.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PALETTE ===== -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">01 — Color</div>
+    <h2 class="sec">Palette</h2>
+    <p class="sec-sub">60 / 30 / 10 — neutrals carry 60%, espresso brown 30%, gold the jewel 10%.</p>
+    <div class="grid swatches" id="swatches"></div>
+  </div>
+</section>
+
+<!-- ===== TYPOGRAPHY ===== -->
+<section style="background:var(--paper)">
+  <div class="wrap">
+    <div class="eyebrow">02 — Typography</div>
+    <h2 class="sec">Type Scale</h2>
+    <p class="sec-sub">Cormorant Garamond (display, echoes the MANSA serif) + Inter (UI). Uppercase wide-tracked eyebrows lift straight from the tagline.</p>
+    <div id="typescale"></div>
+  </div>
+</section>
+
+<!-- ===== BUTTONS ===== -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">03 — Buttons</div>
+    <h2 class="sec">Buttons &amp; States</h2>
+    <p class="sec-sub">Hover the buttons to see lift + gold glow. Gold fill reserved for high-intent (Buy / Checkout).</p>
+    <div class="btnrow">
+      <button class="btn btn-primary">Shop Now</button>
+      <button class="btn btn-gold">Add to Cart</button>
+      <button class="btn btn-ghost">Learn More</button>
+      <button class="btn btn-primary" disabled>Disabled</button>
+    </div>
+    <p style="font-size:13px;color:var(--ink-500)">Primary (espresso) · Gold (gradient, high-intent) · Ghost (outline) · Disabled</p>
+  </div>
+</section>
+
+<!-- ===== BADGES ===== -->
+<section style="background:var(--paper)">
+  <div class="wrap">
+    <div class="eyebrow">04 — Badges</div>
+    <h2 class="sec">Pricing &amp; Status Badges</h2>
+    <div class="btnrow" style="margin-top:8px">
+      <span class="badge b-sale">−12%</span>
+      <span class="badge b-new">New</span>
+      <span class="badge b-best">★ Best Seller</span>
+      <span class="badge b-stock"><span class="dot"></span>In stock</span>
+      <span class="badge b-low">Low stock</span>
+      <span class="badge b-out">Sold out</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRODUCT CARDS ===== -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">05 — Cards</div>
+    <h2 class="sec">Product Cards</h2>
+    <p class="sec-sub">Hover for lift, image zoom, and the gold CTA solidifying.</p>
+    <div class="grid cards" id="cards"></div>
+  </div>
+</section>
+
+<!-- ===== FORMS ===== -->
+<section style="background:var(--paper)">
+  <div class="wrap">
+    <div class="eyebrow">06 — Forms</div>
+    <h2 class="sec">Form Fields</h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr;max-width:680px;margin-top:8px">
+      <div>
+        <label class="field-lbl">Email Address</label>
+        <input class="field" placeholder="you@example.com" />
+        <p class="help">We'll only email about your order.</p>
+      </div>
+      <div>
+        <label class="field-lbl">Phone</label>
+        <input class="field err" value="024 000" />
+        <p class="help err">Enter a valid 10-digit number.</p>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--ink-500);margin-top:14px">Focus a field to see the gold ring.</p>
+  </div>
+</section>
+
+<!-- ===== BANNERS ===== -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">07 — Notifications</div>
+    <h2 class="sec">Banners</h2>
+    <div style="max-width:720px;margin-top:8px">
+      <div class="banner ban-promo"><span class="dot"></span>Free delivery in Accra on orders over GHS 1,000<span class="x">✕</span></div>
+      <div class="banner ban-success">✓ Order confirmed — royally handled.</div>
+      <div class="banner ban-error">Payment could not be processed. Please try again.</div>
+      <div class="banner ban-info">Your item ships within 24 hours.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== LOGO USAGE ===== -->
+<section style="background:var(--paper)">
+  <div class="wrap">
+    <div class="eyebrow">08 — Logo Usage</div>
+    <h2 class="sec">Do's &amp; Don'ts</h2>
+    <div class="grid dd" style="margin-top:8px">
+      <div class="col yes"><h4>✓ Do</h4><ul>
+        <li>✓ Place on white, warm-paper, or espresso (brown-900).</li>
+        <li>✓ Keep clear space = cap-height of the "M" on all sides.</li>
+        <li>✓ Brown-on-light, gold/white-on-dark only.</li>
+        <li>✓ Use the icon (Africa silhouette) for favicons ≥16px.</li>
+      </ul></div>
+      <div class="col no"><h4>✕ Don't</h4><ul>
+        <li>✕ Recolor the wordmark or flatten gold to one tone.</li>
+        <li>✕ Stretch, skew, rotate, or add shadows/glows.</li>
+        <li>✕ Place the full lockup on busy photos.</li>
+        <li>✕ Put gold wordmark on light gold/sand (low contrast).</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WIREFRAMES ===== -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">09 — Layouts</div>
+    <h2 class="sec">Wireframes</h2>
+    <h4 style="font:600 14px 'Inter';margin:18px 0 8px;color:var(--brown-800)">Homepage</h4>
+<pre class="wire"><b>┌─ promo bar (brown-900 / gold) ───────────────────────────────┐</b>
+│ [MANSA ELECTRONICS]   Search… 🔍      ♡  👤  🛒(2)            │ header
+│ Phones  Laptops  Audio  Gaming  Accessories  Deals           │ nav
+├──────────────────────────────────────────────────────────────┤
+│  ELECTRONICS · NEW SEASON        ┌──────────────────┐         │
+│  <b>Technology fit for a king.</b>     │  [device render] │  HERO   │
+│  [ Shop Now ▸ ] [ Explore Deals ]│  gold gradient   │         │
+├──────────────────────────────────────────────────────────────┤
+│ ✓ Authentic  ✓ Warranty  ✓ Fast Delivery  ✓ Secure Pay       │ trust
+├──────────────────────────────────────────────────────────────┤
+│ SHOP BY CATEGORY   [Phones] [Laptops] [Audio]                │
+│ BEST SELLERS       [card][card][card][card]   View all →     │
+│ ░ "Named for a king." editorial band (brown-900) ░           │
+│ NEW ARRIVALS       [card][card][card][card]                  │
+│ Join the court  [email____][Sign up]                         │ newsletter
+<b>└─ FOOTER (brown-900, gold accents) ───────────────────────────┘</b></pre>
+
+    <h4 style="font:600 14px 'Inter';margin:26px 0 8px;color:var(--brown-800)">Product Detail</h4>
+<pre class="wire">│ Home › Laptops › MacBook Air M3            (breadcrumb)       │
+├───────────────────────────────┬──────────────────────────────┤
+│  ┌────────────────────────┐   │ APPLE · LAPTOPS    (eyebrow) │
+│  │      MAIN IMAGE        │   │ <b>MacBook Air M3 13"</b>          │
+│  │   (1:1, paper-warm)    │   │ ★★★★☆ 4.6 · 212 reviews      │
+│  └────────────────────────┘   │ <b>GHS 14,800</b>  ̶1̶6̶,̶2̶0̶0̶  −9%    │
+│  [▣][▣][▣][▣] thumbnails      │ ● In stock · ships today     │
+│                               │ Storage [256][512][1TB]      │
+│                               │ Qty [– 1 +]                  │
+│                               │ [   Add to Cart (gold)    ]  │
+│                               │ [   Buy Now ▸ (ghost)     ]  │
+│                               │ ✓ Authentic ✓ 1yr Warranty   │
+├───────────────────────────────┴──────────────────────────────┤
+│ [Overview] Specs  Reviews  Shipping       (tabs)             │
+│ YOU MAY ALSO LIKE  [card][card][card][card]                  │</pre>
+  </div>
+</section>
+
+<!-- ===== VOICE ===== -->
+<section style="background:var(--brown-900);color:#EAD9C2;border:0">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--gold-400)">10 — Brand Voice</div>
+    <h2 class="sec" style="color:#fff">Refined · Warm · Assured</h2>
+    <p style="max-width:680px;color:#CDBBA6;margin-bottom:24px">Named for Mansa Musa — the wealthiest king in history, who gave generously of it. We speak like a trusted expert, never a discount shouter.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px">
+      <div><b style="color:var(--gold-400)">Tagline</b><p style="margin-top:6px">"Technology fit for a king."</p></div>
+      <div><b style="color:var(--gold-400)">Empty cart</b><p style="margin-top:6px">"Your cart is waiting for greatness."</p></div>
+      <div><b style="color:var(--gold-400)">Order done</b><p style="margin-top:6px">"It's official. Your order is on its way, royally handled."</p></div>
+      <div><b style="color:var(--gold-400)">404</b><p style="margin-top:6px">"Even kings lose their way. Let's get you home."</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="serif" style="font-size:24px;color:#fff;letter-spacing:3px">MANSA <span style="color:var(--gold-500);font-size:14px;letter-spacing:.3em">ELECTRONICS</span></div>
+    <p style="margin-top:10px"><b>Technology · Quality · Trust</b> · © Mansa Electronics 2026 · ShopMansa.com</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+// auto-swap to real logo if present
+const real=document.getElementById('realLogo');
+real.onload=()=>{real.style.display='inline-block';document.getElementById('cssLogo').style.display='none'};
+
+const palette=[
+  ['Brown 900','#200A04'],['Brown 800 · Primary','#351608'],['Brown 700','#3B190A'],['Brown 600','#4A2310'],
+  ['Gold 700','#B27D21'],['Gold 600 · Secondary','#BB842E'],['Gold 500','#C8923A'],['Gold 400','#D0A24D'],
+  ['Gold Hi 200','#EFCD80'],
+  ['Paper','#FFFFFF'],['Paper Warm','#FAF7F2'],['Sand 100','#F2EBE1'],['Sand 300','#D8CCBC'],
+  ['Ink 900','#1A1512'],['Ink 700','#3D3833'],['Ink 500','#6B6258'],
+  ['Success','#3E7C5A'],['Warning','#BB842E'],['Error','#A33A2A'],['Info','#3A5A7A'],
+];
+const sw=document.getElementById('swatches');
+palette.forEach(([n,h])=>{
+  const lightTxt=['#FFFFFF','#FAF7F2','#F2EBE1','#D8CCBC'].includes(h);
+  const el=document.createElement('div');el.className='sw';
+  el.innerHTML=`<div class="chip" style="background:${h};${lightTxt?'border-bottom:1px solid #D8CCBC':''}"></div><div class="meta"><div class="nm">${n}</div><div class="hx">${h}</div></div>`;
+  el.onclick=()=>{navigator.clipboard.writeText(h);toast(h+' copied')};
+  sw.appendChild(el);
+});
+
+const types=[
+  ['H1','Cormorant 56/600','The future, delivered','font:600 56px/1.05 Cormorant Garamond,serif;color:var(--brown-800)'],
+  ['H2','Cormorant 40/600','Shop by category','font:600 40px/1.1 Cormorant Garamond,serif;color:var(--brown-800)'],
+  ['H3','Inter 28/600','Best sellers this week','font:600 28px/1.2 Inter;color:var(--brown-800)'],
+  ['H4','Inter 22/600','Free delivery in Accra','font:600 22px Inter;color:var(--brown-800)'],
+  ['H5','Inter 18/600','MacBook Air M3 13"','font:600 18px Inter;color:var(--brown-800)'],
+  ['Eyebrow','Inter 13/600 · .18em','APPLE · LAPTOPS','font:600 13px Inter;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-700)'],
+  ['Body','Inter 16/400','Authentic devices, expert-picked, delivered across Ghana and beyond.','font:400 16px/1.6 Inter;color:var(--ink-700)'],
+  ['Caption','Inter 13/500','Ships within 24 hours','font:500 13px Inter;color:var(--ink-500)'],
+  ['Price','Inter 20/700 tnum','GHS 14,800','font:700 20px Inter;font-variant-numeric:tabular-nums;color:var(--brown-900)'],
+];
+const ts=document.getElementById('typescale');
+types.forEach(([n,s,sample,css])=>{
+  const r=document.createElement('div');r.className='type-row';
+  r.innerHTML=`<div class="tag-name">${n}</div><div style="${css}">${sample}</div><div class="specs">${s}</div>`;
+  ts.appendChild(r);
+});
+
+const products=[
+  ['📱','SAMSUNG · PHONES','Galaxy S24 Ultra','14,200','15,800','b-sale','−10%','Flagship power, all-day battery.'],
+  ['💻','APPLE · LAPTOPS','MacBook Air M3','14,800','','b-best','★ Best Seller','Pro power, ultralight build.'],
+  ['🎧','SONY · AUDIO','WH-1000XM5','3,950','','b-new','New','Studio-grade, wireless freedom.'],
+  ['⌚','APPLE · WEARABLES','Watch Series 9','3,200','3,600','b-sale','−11%','Your health, on your wrist.'],
+];
+const cw=document.getElementById('cards');
+products.forEach(([emoji,eb,nm,price,old,bc,bl,benefit])=>{
+  const c=document.createElement('div');c.className='card';
+  c.innerHTML=`
+   <div class="imgwrap">
+     <div class="topbadges"><span class="badge ${bc}">${bl}</span><span class="heart">♡</span></div>
+     <div class="imgwrap-emoji">${emoji}</div>
+   </div>
+   <div class="body">
+     <div class="eb">${eb}</div>
+     <div class="nm">${nm}</div>
+     <div class="stars">★★★★☆ <span>4.6 (212)</span></div>
+     <div style="font-size:13px;color:var(--ink-500);margin-bottom:6px">${benefit}</div>
+     <div class="price">GHS ${price}${old?`<s>GHS ${old}</s>`:''}</div>
+     <button class="btn btn-gold cta">Add to Cart</button>
+   </div>`;
+  cw.appendChild(c);
+});
+
+let tt;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1400)}
+</script>
+</body>
+</html>

@@ -3,12 +3,15 @@
 import Link from 'next/link';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCartStore, selectItems, selectSubtotal } from '@/store/cartStore';
-import { cartService, computeTotals } from '@/services/cartService';
+import { computeTotals } from '@/lib/cart';
 import { formatPrice } from '@/lib/money';
+import { deliveryFor, DELIVERY_FEE, FREE_DELIVERY_THRESHOLD } from '@/lib/shipping';
 
 export default function CartPage() {
   const items = useCartStore(selectItems);
   const subtotal = useCartStore(selectSubtotal);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
   const totals = computeTotals(items);
 
   if (items.length === 0) {
@@ -66,7 +69,7 @@ export default function CartPage() {
                       </h3>
                     </Link>
                     <button
-                      onClick={() => cartService.remove(item.productId)}
+                      onClick={() => removeItem(item.productId)}
                       className="flex-shrink-0 rounded-lg p-1.5 text-charcoal-400 transition hover:bg-charcoal-50 hover:text-charcoal-900"
                     >
                       <Trash2 size={14} />
@@ -81,7 +84,7 @@ export default function CartPage() {
                     {/* Qty controls */}
                     <div className="flex items-center rounded-lg border border-charcoal-200">
                       <button
-                        onClick={() => cartService.updateQuantity(item.productId, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                         className="flex h-8 w-8 items-center justify-center text-charcoal-600 hover:bg-charcoal-50 transition"
                       >
                         <Minus size={12} />
@@ -91,7 +94,7 @@ export default function CartPage() {
                       </span>
                       <button
                         onClick={() =>
-                          cartService.updateQuantity(
+                          updateQuantity(
                             item.productId,
                             Math.min(item.quantity + 1, item.maxQuantity ?? 99),
                           )
@@ -128,7 +131,7 @@ export default function CartPage() {
               )}
               <div className="flex justify-between text-charcoal-500">
                 <span>Delivery</span>
-                <span>{subtotal >= 50 ? 'Free' : formatPrice(5, 'USD')}</span>
+                <span>{deliveryFor(subtotal) === 0 ? 'Free' : formatPrice(DELIVERY_FEE, 'USD')}</span>
               </div>
             </div>
 
@@ -138,17 +141,17 @@ export default function CartPage() {
               <span>Total</span>
               <span>
                 {formatPrice(
-                  totals.total + (subtotal >= 50 ? 0 : 5),
+                  totals.total + deliveryFor(subtotal),
                   'USD',
                 )}
               </span>
             </div>
 
-            {subtotal < 50 && (
+            {subtotal < FREE_DELIVERY_THRESHOLD && (
               <p className="mt-2 text-xs text-charcoal-500">
                 Add{' '}
                 <span className="font-semibold text-charcoal-800">
-                  {formatPrice(50 - subtotal, 'USD')}
+                  {formatPrice(FREE_DELIVERY_THRESHOLD - subtotal, 'USD')}
                 </span>{' '}
                 more for free delivery.
               </p>

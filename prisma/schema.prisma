@@ -49,6 +49,7 @@ model Product {
   images             Json?
   price              Decimal   @db.Decimal(10, 2)
   compareAtPrice     Decimal?  @map("compare_at_price") @db.Decimal(10, 2)
+  costPrice          Decimal?  @map("cost_price")       @db.Decimal(10, 2)
   currency           String    @default("USD") @db.VarChar(3)
   lowStockThreshold  Int       @default(3) @map("low_stock_threshold")
   isBestSeller       Boolean   @default(false) @map("is_best_seller")
@@ -62,6 +63,7 @@ model Product {
   inventory          Inventory?
   orderItems         OrderItem[]
   inventoryHistory   InventoryHistory[]
+  priceHistory       PriceHistory[]
 
   @@index([category])
   @@index([isActive])
@@ -168,4 +170,138 @@ model AdminActivity {
   @@index([adminSub])
   @@index([createdAt])
   @@map("admin_activity")
+}
+
+// ─── Pricing engine — WeSellCellular integration ────────────────────────────
+// `wholesale_sources` is the upstream catalog feed (currently one row:
+// WeSellCellular). Status reflects the most recent /sync run.
+model WholesaleSource {
+  id            String                @id @default(cuid())
+  name          String                @unique @db.VarChar(100)
+  baseUrl       String?               @map("base_url") @db.VarChar(500)
+  status        WholesaleSourceStatus @default(idle)
+  lastSyncedAt  DateTime?             @map("last_synced_at")
+  lastError     String?               @map("last_error") @db.Text
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+
+  listings      WholesaleListing[]
+
+  @@map("wholesale_sources")
+}
+
+enum WholesaleSourceStatus {
+  idle
+  syncing
+  ok
+  error
+}
+
+// One row per scraped upstream listing. `(sourceId, sku)` is the natural key
+// so the scraper can upsert idempotently. `rawPayload` preserves the original
+// CSV/HTML row for debugging and re-normalization without a re-scrape.
+model WholesaleListing {
+  id              String          @id @default(cuid())
+  sourceId        String          @map("source_id")
+  source          WholesaleSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  externalId      String?         @map("external_id") @db.VarChar(100)
+  sku             String          @db.VarChar(100)
+  name            String          @db.VarChar(300)
+  brand           String?         @db.VarChar(100)
+  model           String?         @db.VarChar(200)
+  condition       String?         @db.VarChar(50)
+  storage         String?         @db.VarChar(50)
+  color           String?         @db.VarChar(100)
+  carrier         String?         @db.VarChar(100)
+  wholesalePrice  Decimal         @map("wholesale_price") @db.Decimal(10, 2)
+  currency        String          @default("USD") @db.VarChar(3)
+  inStock         Boolean         @default(true) @map("in_stock")
+  stockQuantity   Int?            @map("stock_quantity")
+  sourceUrl       String?         @map("source_url") @db.VarChar(1000)
+  rawPayload      Json?           @map("raw_payload")
+  scrapedAt       DateTime        @default(now()) @map("scraped_at")
+
+  @@unique([sourceId, sku])
+  @@index([sku])
+  @@index([scrapedAt])
+  @@index([brand])
+  @@map("wholesale_listings")
+}
+
+// Rules that translate a wholesale price into a retail price.
+// `scope` + `scopeValue` define what the rule applies to.
+// `priority` resolves conflicts (higher wins). `floor` / `ceiling` are caps.
+model PricingRule {
+  id            String           @id @default(cuid())
+  name          String           @db.VarChar(200)
+  scope         PricingRuleScope
+  scopeValue    String?          @map("scope_value") @db.VarChar(100)
+  markupPct     Decimal          @map("markup_pct") @db.Decimal(6, 3)
+  floorPrice    Decimal?         @map("floor_price") @db.Decimal(10, 2)
+  ceilingPrice  Decimal?         @map("ceiling_price") @db.Decimal(10, 2)
+  priority      Int              @default(0)
+  active        Boolean          @default(true)
+  updatedBy     String?          @map("updated_by") @db.VarChar(100)
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+
+  quotes        PriceQuote[]
+  priceHistory  PriceHistory[]
+
+  @@index([active])
+  @@index([scope])
+  @@map("pricing_rules")
+}
+
+enum PricingRuleScope {
+  global
+  category
+  brand
+  sku
+}
+
+// Logged every time the public price generator returns a quote. Drives
+// analytics ("most-quoted SKUs", "conversion from quote to order").
+model PriceQuote {
+  id            String       @id @default(cuid())
+  sku           String       @db.VarChar(100)
+  basePrice     Decimal      @map("base_price") @db.Decimal(10, 2)
+  appliedRuleId String?      @map("applied_rule_id")
+  appliedRule   PricingRule? @relation(fields: [appliedRuleId], references: [id], onDelete: SetNull)
+  finalPrice    Decimal      @map("final_price") @db.Decimal(10, 2)
+  currency      String       @default("USD") @db.VarChar(3)
+  ipAddress     String?      @map("ip_address") @db.VarChar(45)
+  userAgent     String?      @map("user_agent") @db.VarChar(500)
+  generatedAt   DateTime     @default(now()) @map("generated_at")
+
+  @@index([sku])
+  @@index([generatedAt])
+  @@map("price_quotes")
+}
+
+// Append-only audit log: every Product.price mutation. Mirrors the existing
+// InventoryHistory pattern. `source` says WHY the price changed.
+model PriceHistory {
+  id          String             @id @default(cuid())
+  productId   String             @map("product_id")
+  product     Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  oldPrice    Decimal            @map("old_price") @db.Decimal(10, 2)
+  newPrice    Decimal            @map("new_price") @db.Decimal(10, 2)
+  source      PriceHistorySource
+  ruleId      String?            @map("rule_id")
+  rule        PricingRule?       @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  changedBy   String?            @map("changed_by") @db.VarChar(100)
+  note        String?            @db.Text
+  createdAt   DateTime           @default(now()) @map("created_at")
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("price_history")
+}
+
+enum PriceHistorySource {
+  manual
+  rule_apply
+  bulk_import
+  wholesale_sync
 }

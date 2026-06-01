@@ -72,3 +72,69 @@ export const UpdateInventorySchema = z.object({
     .default('adjustment'),
   note: z.string().trim().max(500).optional(),
 });
+
+// ─── Pricing engine ──────────────────────────────────────────────────────────
+export const QuoteRequestSchema = z
+  .object({
+    sku: z.string().trim().min(1).max(100).optional(),
+    model: z.string().trim().min(1).max(200).optional(),
+    storage: z.string().trim().max(50).optional(),
+    condition: z.string().trim().max(50).optional(),
+    quantity: z.number().int().min(1).max(99).optional().default(1),
+  })
+  .refine((d) => Boolean(d.sku || d.model), {
+    message: 'Provide either sku or model',
+    path: ['sku'],
+  });
+export type QuoteRequestInput = z.infer<typeof QuoteRequestSchema>;
+
+const RuleScopeEnum = z.enum(['global', 'category', 'brand', 'sku']);
+
+export const CreatePricingRuleSchema = z
+  .object({
+    name: z.string().trim().min(1).max(200),
+    scope: RuleScopeEnum,
+    scopeValue: z.string().trim().min(1).max(100).nullable().optional(),
+    markupPct: z.number().min(-100).max(1000),
+    floorPrice: z.number().min(0).max(1_000_000).nullable().optional(),
+    ceilingPrice: z.number().min(0).max(1_000_000).nullable().optional(),
+    priority: z.number().int().min(0).max(1000).optional().default(0),
+    active: z.boolean().optional().default(true),
+  })
+  .refine(
+    (d) => d.scope === 'global' || (d.scopeValue && d.scopeValue.length > 0),
+    { message: 'scopeValue is required when scope is not global', path: ['scopeValue'] },
+  )
+  .refine(
+    (d) =>
+      d.floorPrice == null ||
+      d.ceilingPrice == null ||
+      d.floorPrice <= d.ceilingPrice,
+    { message: 'floorPrice must be <= ceilingPrice', path: ['floorPrice'] },
+  );
+
+export const UpdatePricingRuleSchema = z
+  .object({
+    name: z.string().trim().min(1).max(200).optional(),
+    scope: RuleScopeEnum.optional(),
+    scopeValue: z.string().trim().min(1).max(100).nullable().optional(),
+    markupPct: z.number().min(-100).max(1000).optional(),
+    floorPrice: z.number().min(0).max(1_000_000).nullable().optional(),
+    ceilingPrice: z.number().min(0).max(1_000_000).nullable().optional(),
+    priority: z.number().int().min(0).max(1000).optional(),
+    active: z.boolean().optional(),
+  })
+  .refine(
+    (d) =>
+      d.floorPrice == null ||
+      d.ceilingPrice == null ||
+      d.floorPrice <= d.ceilingPrice,
+    { message: 'floorPrice must be <= ceilingPrice', path: ['floorPrice'] },
+  );
+
+export const ApplyPricingSchema = z.object({
+  dryRun: z.boolean().optional().default(false),
+  productIds: z.array(z.string().min(1).max(64)).max(500).optional(),
+  ruleId: z.string().min(1).max(64).optional(),
+  note: z.string().trim().max(500).optional(),
+});

@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { ChevronLeft, ShieldCheck, Loader2 } from 'lucide-react';
 import { useCartStore, selectItems, selectSubtotal } from '@/store/cartStore';
-import { cartService, computeTotals } from '@/services/cartService';
+import { computeTotals } from '@/lib/cart';
 import { formatPrice } from '@/lib/money';
+import { deliveryFor } from '@/lib/shipping';
 
 const FIELDS = [
   { name: 'name',    label: 'Full Name',       type: 'text',  placeholder: 'Jane Doe',              required: true },
@@ -21,8 +22,9 @@ export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore(selectItems);
   const subtotal = useCartStore(selectSubtotal);
+  const clearCart = useCartStore((s) => s.clear);
   const totals = computeTotals(items);
-  const delivery = subtotal >= 50 ? 0 : 5;
+  const delivery = deliveryFor(subtotal);
   const grandTotal = totals.total + delivery;
 
   const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', notes: '' });
@@ -98,7 +100,7 @@ export default function CheckoutPage() {
         }),
       );
 
-      cartService.clear();
+      clearCart();
       router.push('/success');
     } catch (err) {
       toast.error('Something went wrong. Please try again.');

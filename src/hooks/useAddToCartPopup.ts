@@ -2,53 +2,25 @@
 
 import { useCallback } from 'react';
 import { useCartStore } from '@/store/cartStore';
-import { cartService } from '@/services/cartService';
-import type { CartItem } from '@/types/cart';
+import { toCartItem, type LooseProductInput } from '@/lib/cart';
 
-// Loose product shape — matches what ProductCard / product detail / API pass around.
-export interface PopupProductInput {
-  id: string;
-  slug?: string;
-  name?: string;
-  model?: string;
-  price: number;
-  image?: string;
-  images?: { url: string }[];
-  stock?: number;
-  storage?: string;
-  condition?: string;
-  category?: string;
-  currency?: string;
-}
-
-function toCartItem(p: PopupProductInput, quantity: number): CartItem {
-  return {
-    productId: p.id,
-    slug: p.slug ?? p.id,
-    name: p.name ?? p.model ?? 'Item',
-    image: p.images?.[0]?.url ?? p.image ?? '/placeholder.svg',
-    unitPrice: p.price,
-    quantity,
-    maxQuantity: p.stock,
-    storage: p.storage,
-    condition: p.condition,
-    category: p.category,
-  };
-}
+export type PopupProductInput = LooseProductInput & { currency?: string };
 
 export function useAddToCartPopup() {
   const popupItem = useCartStore((s) => s.popupItem);
   const isOpen = useCartStore((s) => s.isPopupOpen);
   const openPopup = useCartStore((s) => s.openPopup);
   const closePopup = useCartStore((s) => s.closePopup);
+  const addItem = useCartStore((s) => s.addItem);
 
-  // Single entry point for callsites: delegates to existing cart logic, then opens the popup.
+  // Single entry point for callsites: adds to cart, then opens the popup.
   const addAndShow = useCallback(
     (product: PopupProductInput, quantity = 1) => {
-      cartService.addProductDirect(product, quantity);
-      openPopup(toCartItem(product, quantity));
+      const item = toCartItem(product, quantity);
+      addItem(item);
+      openPopup(item);
     },
-    [openPopup],
+    [addItem, openPopup],
   );
 
   return { popupItem, isOpen, openPopup, closePopup, addAndShow };

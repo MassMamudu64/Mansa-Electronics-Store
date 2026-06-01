@@ -6,6 +6,7 @@ import { useState } from 'react';
 import {
   LayoutDashboard,
   Package,
+  TrendingUp,
   ShoppingCart,
   Users,
   Image,
@@ -17,6 +18,7 @@ import {
 const NAV = [
   { label: 'Dashboard',  href: '/admin',           icon: LayoutDashboard },
   { label: 'Products',   href: '/admin/products',   icon: Package },
+  { label: 'Pricing',    href: '/admin/pricing',    icon: TrendingUp },
   { label: 'Orders',     href: '/admin/orders',     icon: ShoppingCart },
   { label: 'Customers',  href: '/admin/customers',  icon: Users },
   { label: 'Banners',    href: '/admin/banners',    icon: Image },

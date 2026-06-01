@@ -26,8 +26,8 @@ export default function ShopPage() {
 
 function ShopFallback() {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container-site py-20 text-center text-sm text-charcoal-400">Loading shop…</div>
+    <div className="min-h-screen bg-paper-warm">
+      <div className="container-site py-20 text-center text-sm text-ink-500">Loading shop…</div>
     </div>
   );
 }
@@ -136,23 +136,24 @@ function ShopContent() {
     CATEGORIES.find((c) => c.value === filters.category)?.label ?? null;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-paper-warm">
       {/* ─── Hero header ─── */}
-      <section className="relative overflow-hidden border-b border-charcoal-100 bg-gradient-to-b from-charcoal-50 via-white to-white">
-        {/* Subtle radial accent */}
+      <section className="relative overflow-hidden border-b border-sand-300 bg-hero-warm">
+        {/* Subtle gold radial accent */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-32 left-1/2 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-charcoal-200/40 blur-3xl"
+          className="pointer-events-none absolute -top-32 left-1/2 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-gold-200/30 blur-3xl"
         />
         <div className="container-site relative py-12 sm:py-16">
           <p className="eyebrow">Shop</p>
-          <h1 className="mt-2 text-4xl font-black tracking-tight text-charcoal-900 sm:text-5xl">
+          <h1 className="mt-2 font-serif text-5xl font-semibold tracking-tight text-brown-800 sm:text-6xl">
             {activeCategoryLabel ?? 'All Products'}
           </h1>
-          <p className="mt-3 max-w-xl text-sm text-charcoal-500 sm:text-base">
+          <p className="mt-3 max-w-xl text-sm text-ink-500 sm:text-base">
             Premium electronics, fully tested and ready to ship. Every device is graded, cleaned and
             backed by our guarantee.
           </p>
+          <div className="hairline-gold mt-6 max-w-[6rem]" />
         </div>
       </section>
 

@@ -1,5 +1,10 @@
+'use client';
+
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Smartphone, Zap, Headphones, Shield, Cable, BatteryCharging } from 'lucide-react';
+
+const EASE = [0.22, 1, 0.36, 1];
 
 const CATEGORIES = [
   { icon: Smartphone, label: 'Smartphones', href: '/shop?category=iPhone', desc: 'Latest models' },
@@ -10,34 +15,57 @@ const CATEGORIES = [
   { icon: BatteryCharging, label: 'Power Banks', href: '/shop?category=PowerBanks', desc: 'Portable power' },
 ];
 
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+const item = {
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+};
+
 export default function CategorySection() {
   return (
-    <section className="bg-charcoal-900 section">
+    <section className="relative section bg-espresso-fade">
+      <div className="hairline-gold absolute inset-x-0 top-0 opacity-50" />
       <div className="container-site">
-        <div className="mb-10 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-80px' }}
+          transition={{ duration: 0.6, ease: EASE }}
+          className="mb-12 text-center"
+        >
           <p className="eyebrow-light mb-3">Browse</p>
-          <h2 className="text-3xl font-black tracking-tight text-white md:text-4xl">
+          <h2 className="font-serif text-4xl font-semibold tracking-tight text-white md:text-5xl">
             Shop by Category
           </h2>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <motion.div
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: '-60px' }}
+          className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
+        >
           {CATEGORIES.map(({ icon: Icon, label, href, desc }) => (
-            <Link
-              key={label}
-              href={href}
-              className="group flex flex-col items-center gap-3 rounded-2xl border border-charcoal-700 bg-charcoal-800 p-5 text-center transition-all duration-200 hover:border-charcoal-500 hover:bg-charcoal-700"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-charcoal-700 transition group-hover:bg-charcoal-600">
-                <Icon size={22} className="text-charcoal-200" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-white">{label}</p>
-                <p className="mt-0.5 text-[11px] text-charcoal-500">{desc}</p>
-              </div>
-            </Link>
+            <motion.div key={label} variants={item} whileHover={{ y: -6 }}>
+              <Link
+                href={href}
+                className="group flex h-full flex-col items-center gap-3 rounded-2xl border border-brown-700 bg-white/[0.03] p-5 text-center backdrop-blur-sm transition-all duration-300 ease-mansa hover:border-gold-500/50 hover:bg-white/[0.06] hover:shadow-gold"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brown-700 transition-all duration-300 group-hover:bg-gold-gradient">
+                  <Icon size={22} className="text-gold-400 transition-colors duration-300 group-hover:text-brown-900" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white transition-colors group-hover:text-gold-200">{label}</p>
+                  <p className="mt-0.5 text-[11px] text-[#9C8A73]">{desc}</p>
+                </div>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
