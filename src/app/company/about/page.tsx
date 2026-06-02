@@ -44,32 +44,37 @@ export default function AboutPage() {
       />
 
       <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 space-y-16">
-        {/* Brand story */}
-        <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-charcoal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-charcoal-700">
-            <Sparkles size={12} /> Our story
-          </span>
-          <h2 className="mt-4 text-2xl font-bold tracking-tight text-charcoal-900 sm:text-3xl">
-            Premium tech, without the markup.
-          </h2>
-          <div className="mt-6 space-y-4 text-base leading-relaxed text-charcoal-600 sm:text-[17px]">
-            <p>
-              Mansa Electronics began with a simple frustration: getting a premium smartphone
-              shouldn’t require taking out a loan, accepting a mystery-condition device, or
-              navigating an opaque return policy.
-            </p>
-            <p>
-              We built Mansa to fix that. We source carefully, inspect every device, and document
-              what you’re actually buying — battery health, cosmetic grade, included accessories,
-              everything. Then we back it with a real warranty and real human support.
-            </p>
-            <p>
-              We’re a small team based in Dakar shipping worldwide. We care about the details
-              other companies skip, and we’d rather sell fewer devices well than more devices
-              carelessly.
-            </p>
-          </div>
-        </div>
+       {/* Brand story */}
+<div>
+  <span className="inline-flex items-center gap-2 rounded-full bg-charcoal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-charcoal-700">
+    <Sparkles size={12} /> Our story
+  </span>
+
+  <h2 className="mt-4 text-2xl font-bold tracking-tight text-charcoal-900 sm:text-3xl">
+    Premium tech, without the markup.
+  </h2>
+
+  <div className="mt-6 space-y-4 text-base leading-relaxed text-charcoal-600 sm:text-[17px]">
+    <p>
+      Mansa Electronics began with a simple truth: people across Africa deserve access to the same
+      premium American devices — without inflated prices, unclear conditions, or confusing return
+      policies.
+    </p>
+
+    <p>
+      So we built a better path. From the USA, we source carefully, inspect every device, and
+      document exactly what you're getting — battery health, cosmetic grade, accessories, everything.
+      Every order is backed by a real warranty and real human support.
+    </p>
+
+    <p>
+      We're a small U.S.-based team serving customers across Africa and beyond. We focus on the
+      details others skip, because we'd rather deliver fewer devices perfectly than many devices
+      carelessly.
+    </p>
+  </div>
+</div>
+
 
         {/* Mission */}
         <div className="rounded-3xl bg-charcoal-900 p-8 text-white sm:p-10">

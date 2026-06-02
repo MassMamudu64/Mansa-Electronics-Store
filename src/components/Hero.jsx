@@ -65,7 +65,7 @@ export default function Hero() {
           <motion.div variants={up} className="mb-6 flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold-600/30 bg-white/[0.04] px-4 py-1.5 text-xs font-semibold uppercase tracking-eyebrow text-gold-400 backdrop-blur-sm">
               <Sparkles size={13} className="text-gold-400" />
-              Mansa Electronics
+              Mansa Group - DBA Mansa Electronics
             </span>
           </motion.div>
 
@@ -74,11 +74,11 @@ export default function Hero() {
             variants={up}
             className="font-serif text-6xl font-semibold leading-[1.02] tracking-tight text-white md:text-7xl lg:text-8xl"
           >
-            Technology fit
+          Authentic Tech, 
             <br />
             <span className="relative inline-block">
               <span className="animate-shimmer-text bg-[linear-gradient(110deg,#EFCD80,#D0A24D,#B27D21,#EFCD80)] bg-[length:200%_auto] bg-clip-text text-transparent">
-                for a king.
+              Buit to Last
               </span>
             </span>
           </motion.h1>
@@ -88,9 +88,11 @@ export default function Hero() {
             variants={up}
             className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-[#CDBBA6] md:text-xl"
           >
-            Authentic devices, expert-picked, delivered with honour.
+            Verified Apple & Android devices — delivered 
+            {/* Authentic devices, expert-picked, delivered with honour. */}
             <br className="hidden md:block" />
-            Technology. Quality. Trust.
+            {/* Technology. Quality. Trust. */}
+            with honour across borders.
           </motion.p>
 
           {/* CTAs */}
