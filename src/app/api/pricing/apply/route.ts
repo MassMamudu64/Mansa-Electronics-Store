@@ -54,7 +54,9 @@ export async function POST(req: NextRequest) {
         adminSub: auth.session.sub,
         action: 'pricing.apply',
         resource: 'pricing_rule',
-        resourceId: parsed.data.ruleId ?? null,
+        resourceId: parsed.data.ruleId ?? undefined,
+
+        // resourceId: parsed.data.ruleId ?? null,
         metadata: {
           productsConsidered: result.productsConsidered,
           productsChanged: result.productsChanged,
