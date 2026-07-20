@@ -2,9 +2,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 // brand/mansa-logo.png is copied to /public/mansa-logo.png so Next can serve it.
-const LOGO_SRC = '/mansa-logo.png';
-const LOGO_W = 1536;
-const LOGO_H = 1024;
+const LOGO_SRC = '/mansalogaNoBG.png';
+const LOGO_W = 1836;
+const LOGO_H = 1824;
 
 /**
  * variant="dark"  → logo on light surfaces (header)

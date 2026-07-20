@@ -65,7 +65,7 @@ export default function Hero() {
           <motion.div variants={up} className="mb-6 flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold-600/30 bg-white/[0.04] px-4 py-1.5 text-xs font-semibold uppercase tracking-eyebrow text-gold-400 backdrop-blur-sm">
               <Sparkles size={13} className="text-gold-400" />
-              Mansa Group - DBA Mansa Electronics
+              Mansa Group LLC - DBA Mansa Electronics
             </span>
           </motion.div>
 

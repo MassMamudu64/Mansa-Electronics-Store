@@ -1,30 +1,3 @@
-// =============================================================================
-// Mansa Electronics — Prisma schema (Supabase PostgreSQL)
-//
-// MIGRATION NOTE:
-// Hostinger MySQL configuration preserved below as comments (DEPRECATED).
-// Supabase PostgreSQL configuration is now active.
-//
-// Field types in the models below are portable across MySQL and PostgreSQL —
-// `@db.VarChar(N)`, `@db.Text`, and `@db.Decimal(p,s)` are valid on both
-// providers, and `Json` maps to `JSONB` on PostgreSQL by default (which is
-// what we want — indexable, binary-encoded). Enums become real PostgreSQL
-// enum types under the hood. No model-level rewrites were required.
-//
-// Workflow:
-//   Generate client:  npx prisma generate
-//   Push schema:      npx prisma db push          (no migration history; MVP)
-//   Or migrate:       npx prisma migrate dev      (creates a fresh PG migration)
-//
-// TODO (manual): the legacy MySQL migration in prisma/migrations/20260503000000_init
-// MUST NOT be run against PostgreSQL — its SQL uses backticks and MySQL-only
-// syntax. Either:
-//   (a) delete the prisma/migrations folder and run `prisma migrate dev --name init_postgres`
-//       against the Supabase database to generate a fresh PG migration, OR
-//   (b) run `prisma db push` against Supabase to sync the schema without
-//       a migration history (acceptable for MVP, recommended for the cutover).
-// =============================================================================
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -35,35 +8,33 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ─── Catalog ────────────────────────────────────────────────────────────────
 model Product {
-  id                 String    @id
-  slug               String    @unique
-  name               String    @db.VarChar(200)
-  category           String    @db.VarChar(50)
-  brand              String?   @db.VarChar(50)
-  sku                String?   @unique @db.VarChar(50)
-  description        String?   @db.Text
-  bullets            Json?
-  imageUrl           String?   @map("image_url") @db.VarChar(500)
-  images             Json?
-  price              Decimal   @db.Decimal(10, 2)
-  compareAtPrice     Decimal?  @map("compare_at_price") @db.Decimal(10, 2)
-  costPrice          Decimal?  @map("cost_price")       @db.Decimal(10, 2)
-  currency           String    @default("USD") @db.VarChar(3)
-  lowStockThreshold  Int       @default(3) @map("low_stock_threshold")
-  isBestSeller       Boolean   @default(false) @map("is_best_seller")
-  isActive           Boolean   @default(true) @map("is_active")
-  tags               Json?
-  compatibility      Json?
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
-  archivedAt         DateTime? @map("archived_at")
-
-  inventory          Inventory?
-  orderItems         OrderItem[]
-  inventoryHistory   InventoryHistory[]
-  priceHistory       PriceHistory[]
+  id                String             @id
+  slug              String             @unique
+  name              String             @db.VarChar(200)
+  category          String             @db.VarChar(50)
+  brand             String?            @db.VarChar(50)
+  sku               String?            @unique @db.VarChar(50)
+  description       String?
+  bullets           Json?
+  imageUrl          String?            @map("image_url") @db.VarChar(500)
+  images            Json?
+  price             Decimal            @db.Decimal(10, 2)
+  compareAtPrice    Decimal?           @map("compare_at_price") @db.Decimal(10, 2)
+  currency          String             @default("USD") @db.VarChar(3)
+  lowStockThreshold Int                @default(3) @map("low_stock_threshold")
+  isBestSeller      Boolean            @default(false) @map("is_best_seller")
+  isActive          Boolean            @default(true) @map("is_active")
+  tags              Json?
+  compatibility     Json?
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+  archivedAt        DateTime?          @map("archived_at")
+  costPrice         Decimal?           @map("cost_price") @db.Decimal(10, 2)
+  inventory         Inventory?
+  inventoryHistory  InventoryHistory[]
+  orderItems        OrderItem[]
+  priceHistory      PriceHistory[]
 
   @@index([category])
   @@index([isActive])
@@ -71,18 +42,16 @@ model Product {
   @@map("products")
 }
 
-// ─── Stock (single source of truth — separated from Product per the brief) ──
 model Inventory {
   id        String   @id @default(cuid())
   productId String   @unique @map("product_id")
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   stock     Int      @default(0)
   updatedAt DateTime @updatedAt @map("updated_at")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("inventory")
 }
 
-// ─── Orders + line items ────────────────────────────────────────────────────
 model Order {
   id              String      @id
   shortCode       String      @unique @map("short_code")
@@ -90,7 +59,7 @@ model Order {
   customerEmail   String      @map("customer_email") @db.VarChar(254)
   customerPhone   String      @map("customer_phone") @db.VarChar(30)
   customerAddress String      @map("customer_address") @db.VarChar(500)
-  customerNotes   String?     @map("customer_notes") @db.Text
+  customerNotes   String?     @map("customer_notes")
   subtotal        Decimal     @db.Decimal(10, 2)
   bundleDiscount  Decimal     @default(0) @map("bundle_discount") @db.Decimal(10, 2)
   delivery        Decimal     @db.Decimal(10, 2)
@@ -98,7 +67,6 @@ model Order {
   status          OrderStatus @default(pending)
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
-
   items           OrderItem[]
 
   @@index([status])
@@ -107,54 +75,39 @@ model Order {
   @@map("orders")
 }
 
-enum OrderStatus {
-  pending
-  confirmed
-  completed
-  cancelled
-}
-
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String  @map("order_id")
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId String  @map("product_id")
-  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
   name      String  @db.VarChar(200)
   sku       String? @db.VarChar(50)
   price     Decimal @db.Decimal(10, 2)
   quantity  Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
   @@index([productId])
   @@map("order_items")
 }
 
-// ─── Audit logs ─────────────────────────────────────────────────────────────
 model InventoryHistory {
   id             String              @id @default(cuid())
   productId      String              @map("product_id")
-  product        Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
   productName    String              @map("product_name") @db.VarChar(200)
   sku            String?             @db.VarChar(50)
   changeType     InventoryChangeType @map("change_type")
   quantityBefore Int                 @map("quantity_before")
   quantityAfter  Int                 @map("quantity_after")
   delta          Int
-  note           String?             @db.Text
+  note           String?
   changedBy      String?             @map("changed_by") @db.VarChar(100)
   createdAt      DateTime            @default(now()) @map("created_at")
+  product        Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([createdAt])
   @@map("inventory_history")
-}
-
-enum InventoryChangeType {
-  restock
-  deduction
-  adjustment
-  correction
 }
 
 model AdminActivity {
@@ -172,22 +125,116 @@ model AdminActivity {
   @@map("admin_activity")
 }
 
-// ─── Pricing engine — WeSellCellular integration ────────────────────────────
-// `wholesale_sources` is the upstream catalog feed (currently one row:
-// WeSellCellular). Status reflects the most recent /sync run.
 model WholesaleSource {
-  id            String                @id @default(cuid())
-  name          String                @unique @db.VarChar(100)
-  baseUrl       String?               @map("base_url") @db.VarChar(500)
-  status        WholesaleSourceStatus @default(idle)
-  lastSyncedAt  DateTime?             @map("last_synced_at")
-  lastError     String?               @map("last_error") @db.Text
-  createdAt     DateTime              @default(now()) @map("created_at")
-  updatedAt     DateTime              @updatedAt @map("updated_at")
-
-  listings      WholesaleListing[]
+  id           String                @id @default(cuid())
+  name         String                @unique @db.VarChar(100)
+  baseUrl      String?               @map("base_url") @db.VarChar(500)
+  status       WholesaleSourceStatus @default(idle)
+  lastSyncedAt DateTime?             @map("last_synced_at")
+  lastError    String?               @map("last_error")
+  createdAt    DateTime              @default(now()) @map("created_at")
+  updatedAt    DateTime              @updatedAt @map("updated_at")
+  listings     WholesaleListing[]
 
   @@map("wholesale_sources")
+}
+
+model WholesaleListing {
+  id             String          @id @default(cuid())
+  sourceId       String          @map("source_id")
+  externalId     String?         @map("external_id") @db.VarChar(100)
+  sku            String          @db.VarChar(100)
+  name           String          @db.VarChar(300)
+  brand          String?         @db.VarChar(100)
+  model          String?         @db.VarChar(200)
+  condition      String?         @db.VarChar(50)
+  storage        String?         @db.VarChar(50)
+  color          String?         @db.VarChar(100)
+  carrier        String?         @db.VarChar(100)
+  wholesalePrice Decimal         @map("wholesale_price") @db.Decimal(10, 2)
+  currency       String          @default("USD") @db.VarChar(3)
+  inStock        Boolean         @default(true) @map("in_stock")
+  stockQuantity  Int?            @map("stock_quantity")
+  sourceUrl      String?         @map("source_url") @db.VarChar(1000)
+  rawPayload     Json?           @map("raw_payload")
+  scrapedAt      DateTime        @default(now()) @map("scraped_at")
+  source         WholesaleSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, sku])
+  @@index([sku])
+  @@index([scrapedAt])
+  @@index([brand])
+  @@map("wholesale_listings")
+}
+
+model PricingRule {
+  id           String           @id @default(cuid())
+  name         String           @db.VarChar(200)
+  scope        PricingRuleScope
+  scopeValue   String?          @map("scope_value") @db.VarChar(100)
+  markupPct    Decimal          @map("markup_pct") @db.Decimal(6, 3)
+  floorPrice   Decimal?         @map("floor_price") @db.Decimal(10, 2)
+  ceilingPrice Decimal?         @map("ceiling_price") @db.Decimal(10, 2)
+  priority     Int              @default(0)
+  active       Boolean          @default(true)
+  updatedBy    String?          @map("updated_by") @db.VarChar(100)
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+  priceHistory PriceHistory[]
+  quotes       PriceQuote[]
+
+  @@index([active])
+  @@index([scope])
+  @@map("pricing_rules")
+}
+
+model PriceQuote {
+  id            String       @id @default(cuid())
+  sku           String       @db.VarChar(100)
+  basePrice     Decimal      @map("base_price") @db.Decimal(10, 2)
+  appliedRuleId String?      @map("applied_rule_id")
+  finalPrice    Decimal      @map("final_price") @db.Decimal(10, 2)
+  currency      String       @default("USD") @db.VarChar(3)
+  ipAddress     String?      @map("ip_address") @db.VarChar(45)
+  userAgent     String?      @map("user_agent") @db.VarChar(500)
+  generatedAt   DateTime     @default(now()) @map("generated_at")
+  appliedRule   PricingRule? @relation(fields: [appliedRuleId], references: [id])
+
+  @@index([sku])
+  @@index([generatedAt])
+  @@map("price_quotes")
+}
+
+model PriceHistory {
+  id        String             @id @default(cuid())
+  productId String             @map("product_id")
+  oldPrice  Decimal            @map("old_price") @db.Decimal(10, 2)
+  newPrice  Decimal            @map("new_price") @db.Decimal(10, 2)
+  source    PriceHistorySource
+  ruleId    String?            @map("rule_id")
+  changedBy String?            @map("changed_by") @db.VarChar(100)
+  note      String?
+  createdAt DateTime           @default(now()) @map("created_at")
+  product   Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rule      PricingRule?       @relation(fields: [ruleId], references: [id])
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("price_history")
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+enum InventoryChangeType {
+  restock
+  deduction
+  adjustment
+  correction
 }
 
 enum WholesaleSourceStatus {
@@ -197,106 +244,11 @@ enum WholesaleSourceStatus {
   error
 }
 
-// One row per scraped upstream listing. `(sourceId, sku)` is the natural key
-// so the scraper can upsert idempotently. `rawPayload` preserves the original
-// CSV/HTML row for debugging and re-normalization without a re-scrape.
-model WholesaleListing {
-  id              String          @id @default(cuid())
-  sourceId        String          @map("source_id")
-  source          WholesaleSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  externalId      String?         @map("external_id") @db.VarChar(100)
-  sku             String          @db.VarChar(100)
-  name            String          @db.VarChar(300)
-  brand           String?         @db.VarChar(100)
-  model           String?         @db.VarChar(200)
-  condition       String?         @db.VarChar(50)
-  storage         String?         @db.VarChar(50)
-  color           String?         @db.VarChar(100)
-  carrier         String?         @db.VarChar(100)
-  wholesalePrice  Decimal         @map("wholesale_price") @db.Decimal(10, 2)
-  currency        String          @default("USD") @db.VarChar(3)
-  inStock         Boolean         @default(true) @map("in_stock")
-  stockQuantity   Int?            @map("stock_quantity")
-  sourceUrl       String?         @map("source_url") @db.VarChar(1000)
-  rawPayload      Json?           @map("raw_payload")
-  scrapedAt       DateTime        @default(now()) @map("scraped_at")
-
-  @@unique([sourceId, sku])
-  @@index([sku])
-  @@index([scrapedAt])
-  @@index([brand])
-  @@map("wholesale_listings")
-}
-
-// Rules that translate a wholesale price into a retail price.
-// `scope` + `scopeValue` define what the rule applies to.
-// `priority` resolves conflicts (higher wins). `floor` / `ceiling` are caps.
-model PricingRule {
-  id            String           @id @default(cuid())
-  name          String           @db.VarChar(200)
-  scope         PricingRuleScope
-  scopeValue    String?          @map("scope_value") @db.VarChar(100)
-  markupPct     Decimal          @map("markup_pct") @db.Decimal(6, 3)
-  floorPrice    Decimal?         @map("floor_price") @db.Decimal(10, 2)
-  ceilingPrice  Decimal?         @map("ceiling_price") @db.Decimal(10, 2)
-  priority      Int              @default(0)
-  active        Boolean          @default(true)
-  updatedBy     String?          @map("updated_by") @db.VarChar(100)
-  createdAt     DateTime         @default(now()) @map("created_at")
-  updatedAt     DateTime         @updatedAt @map("updated_at")
-
-  quotes        PriceQuote[]
-  priceHistory  PriceHistory[]
-
-  @@index([active])
-  @@index([scope])
-  @@map("pricing_rules")
-}
-
 enum PricingRuleScope {
   global
   category
   brand
   sku
-}
-
-// Logged every time the public price generator returns a quote. Drives
-// analytics ("most-quoted SKUs", "conversion from quote to order").
-model PriceQuote {
-  id            String       @id @default(cuid())
-  sku           String       @db.VarChar(100)
-  basePrice     Decimal      @map("base_price") @db.Decimal(10, 2)
-  appliedRuleId String?      @map("applied_rule_id")
-  appliedRule   PricingRule? @relation(fields: [appliedRuleId], references: [id], onDelete: SetNull)
-  finalPrice    Decimal      @map("final_price") @db.Decimal(10, 2)
-  currency      String       @default("USD") @db.VarChar(3)
-  ipAddress     String?      @map("ip_address") @db.VarChar(45)
-  userAgent     String?      @map("user_agent") @db.VarChar(500)
-  generatedAt   DateTime     @default(now()) @map("generated_at")
-
-  @@index([sku])
-  @@index([generatedAt])
-  @@map("price_quotes")
-}
-
-// Append-only audit log: every Product.price mutation. Mirrors the existing
-// InventoryHistory pattern. `source` says WHY the price changed.
-model PriceHistory {
-  id          String             @id @default(cuid())
-  productId   String             @map("product_id")
-  product     Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
-  oldPrice    Decimal            @map("old_price") @db.Decimal(10, 2)
-  newPrice    Decimal            @map("new_price") @db.Decimal(10, 2)
-  source      PriceHistorySource
-  ruleId      String?            @map("rule_id")
-  rule        PricingRule?       @relation(fields: [ruleId], references: [id], onDelete: SetNull)
-  changedBy   String?            @map("changed_by") @db.VarChar(100)
-  note        String?            @db.Text
-  createdAt   DateTime           @default(now()) @map("created_at")
-
-  @@index([productId])
-  @@index([createdAt])
-  @@map("price_history")
 }
 
 enum PriceHistorySource {
